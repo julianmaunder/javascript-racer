@@ -18,7 +18,7 @@
 
 body          { font-family: Arial, Helvetica, sans-serif; background: #e7e7df; margin: 0; padding: 0; }
 #stats        { border: 2px solid black; }
-#controls     { display: none; width: 28em; float: left; padding: 1em; font-size: 0.7em; }
+#controls     { width: 28em; float: left; padding: 1em; font-size: 0.7em; }
 #controls th  { text-align: right; vertical-align: middle; }
 #instructions { clear: left; float: left; width: 17em; padding: 1em; border: 1px solid black; box-shadow: 0 0 5px black; }
 #racer        { position: relative; top: 0; z-index: 0; width: 640px; height: 480px; margin-left: 20em; }

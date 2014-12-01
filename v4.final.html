@@ -71,6 +71,7 @@
       <span id="fast_lap_time"    class="hud">Fastest Lap: <span id="fast_lap_time_value" class="value">0.0</span></span>
     </div>
     <div id="wolf" class="wolf-animation straight"> </div>
+    <div class="feather-animation"> </div>
     <canvas id="canvas">
       Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
     </canvas>
@@ -128,7 +129,7 @@
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-    var totalCars      = 200;                     // total number of cars on the road
+    var totalCars      = 100;                     // total number of cars on the road
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
     var score          = 0;
@@ -206,10 +207,16 @@
         if (speed > car.speed) {
           if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
             // speed    = car.speed * (car.speed/speed);
-            // position = Util.increase(car.z, -playerZ, trackLength);
+            // position = Util.increase(car.z, -playerZ, trackLength)
             car.offset = 1000;
             score += 1;
             console.log(score);
+              if ($('.feather-animation').hasClass('feather-pop2')) {
+                $('.feather-animation').addClass('feather-pop').removeClass('feather-pop2');
+               } else {
+                  $('.feather-animation').addClass('feather-pop2').removeClass("feather-pop");
+               }
+
             break;
           }
         }

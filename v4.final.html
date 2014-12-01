@@ -63,38 +63,36 @@
     </tr>
   </table>
 
-  <div id='instructions'>
-    <p>Use the <b>arrow keys</b> to drive the car.</p>
-  </div>
-
   <div id="racer">
+    <span id="speed" class="hud"><span id="speed_value" class="value">0</span></span>
     <div id="hud">
-      <span id="speed"            class="hud"><span id="speed_value" class="value">0</span> mph</span>
       <span id="current_lap_time" class="hud">Time: <span id="current_lap_time_value" class="value">0.0</span></span> 
       <span id="last_lap_time"    class="hud">Last Lap: <span id="last_lap_time_value" class="value">0.0</span></span>
       <span id="fast_lap_time"    class="hud">Fastest Lap: <span id="fast_lap_time_value" class="value">0.0</span></span>
     </div>
+    <div id="wolf" class="wolf-animation straight"> </div>
     <canvas id="canvas">
       Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
     </canvas>
     Loading...
   </div>
 
-  <audio id='music'>
+<!--   <audio id='music'>
     <source src="music/racer.ogg">
     <source src="music/racer.mp3">
   </audio>
-  <span id="mute"></span>
+  <span id="mute"></span> -->
 
+  <script src="zepto.min.js"></script>
   <script src="stats.js"></script>
   <script src="common.js"></script>
   <script>
 
     var fps            = 60;                      // how many 'update' frames per second
     var step           = 1/fps;                   // how long is each frame (in seconds)
-    var width          = 1024;                    // logical canvas width
-    var height         = 768;                     // logical canvas height
-    var centrifugal    = 0.3;                     // centrifugal force multiplier when going around curves
+    var width          = 640;                    // logical canvas width
+    var height         = 480;                     // logical canvas height
+    var centrifugal    = 0.2;                     // centrifugal force multiplier when going around curves
     var offRoadDecel   = 0.99;                    // speed multiplier when off road (e.g. you lose 2% speed each update frame)
     var skySpeed       = 0.001;                   // background sky layer scroll speed when going around curve (or up hill)
     var hillSpeed      = 0.002;                   // background hill layer scroll speed when going around curve (or up hill)
@@ -133,11 +131,14 @@
     var totalCars      = 200;                     // total number of cars on the road
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
+    var score          = 0;
+    var combo          = true;
 
     var keyLeft        = false;
     var keyRight       = false;
     var keyFaster      = false;
     var keySlower      = false;
+    var straight       = true;
 
     var hud = {
       speed:            { value: null, dom: Dom.get('speed_value')            },
@@ -145,6 +146,7 @@
       last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
       fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
     }
+
 
     //=========================================================================
     // UPDATE THE GAME WORLD
@@ -163,19 +165,23 @@
 
       position = Util.increase(position, dt * speed, trackLength);
 
-      if (keyLeft)
+      if (keyLeft) {
         playerX = playerX - dx;
-      else if (keyRight)
+        $('#wolf').addClass("left").removeClass("straight right");
+      }
+        
+      else if (keyRight) {
         playerX = playerX + dx;
+        $('#wolf').addClass("right").removeClass("straight left");
+      }
+
+      else if (keyLeft === false && keyRight === false) {
+        $('#wolf').addClass('straight').removeClass("right left");
+      }
 
       playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-      if (keyFaster)
         speed = Util.accelerate(speed, accel, dt);
-      else if (keySlower)
-        speed = Util.accelerate(speed, breaking, dt);
-      else
-        speed = Util.accelerate(speed, decel, dt);
 
 
       if ((playerX < -1) || (playerX > 1)) {
@@ -187,9 +193,9 @@
           sprite  = playerSegment.sprites[n];
           spriteW = sprite.source.w * SPRITES.SCALE;
           if (Util.overlap(playerX, playerW, sprite.offset + spriteW/2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
-            speed = maxSpeed/5;
-            position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength); // stop in front of sprite (at front of segment)
-            break;
+            // speed = maxSpeed/5;
+            // position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength); // stop in front of sprite (at front of segment)
+            // break;
           }
         }
       }
@@ -199,14 +205,17 @@
         carW = car.sprite.w * SPRITES.SCALE;
         if (speed > car.speed) {
           if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
-            speed    = car.speed * (car.speed/speed);
-            position = Util.increase(car.z, -playerZ, trackLength);
+            // speed    = car.speed * (car.speed/speed);
+            // position = Util.increase(car.z, -playerZ, trackLength);
+            car.offset = 1000;
+            score += 1;
+            console.log(score);
             break;
           }
         }
       }
 
-      playerX = Util.limit(playerX, -3, 3);     // dont ever let it go too far out of bounds
+      playerX = Util.limit(playerX, -1, 1);     // dont ever let it go too far out of bounds
       speed   = Util.limit(speed, 0, maxSpeed); // or exceed maxSpeed
 
       skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
@@ -235,7 +244,7 @@
         }
       }
 
-      updateHud('speed',            5 * Math.round(speed/500));
+      updateHud('speed',            (score));
       updateHud('current_lap_time', formatTime(currentLapTime));
     }
 
@@ -247,10 +256,12 @@
         car         = cars[n];
         oldSegment  = findSegment(car.z);
         car.offset  = car.offset + updateCarOffset(car, oldSegment, playerSegment, playerW);
-        car.z       = Util.increase(car.z, dt * car.speed, trackLength);
+        // car.z       = Util.increase(car.z, dt * car.speed, trackLength);
         car.percent = Util.percentRemaining(car.z, segmentLength); // useful for interpolation during rendering phase
         newSegment  = findSegment(car.z);
         if (oldSegment != newSegment) {
+          combo = false;
+          console.log(combo);
           index = oldSegment.cars.indexOf(car);
           oldSegment.cars.splice(index, 1);
           newSegment.cars.push(car);
@@ -540,49 +551,49 @@
     }
 
     function resetSprites() {
-      var n, i;
+      // var n, i;
 
-      addSprite(20,  SPRITES.BILLBOARD07, -1);
-      addSprite(40,  SPRITES.BILLBOARD06, -1);
-      addSprite(60,  SPRITES.BILLBOARD08, -1);
-      addSprite(80,  SPRITES.BILLBOARD09, -1);
-      addSprite(100, SPRITES.BILLBOARD01, -1);
-      addSprite(120, SPRITES.BILLBOARD02, -1);
-      addSprite(140, SPRITES.BILLBOARD03, -1);
-      addSprite(160, SPRITES.BILLBOARD04, -1);
-      addSprite(180, SPRITES.BILLBOARD05, -1);
+      // addSprite(20,  SPRITES.BILLBOARD07, -1);
+      // addSprite(40,  SPRITES.BILLBOARD06, -1);
+      // addSprite(60,  SPRITES.BILLBOARD08, -1);
+      // addSprite(80,  SPRITES.BILLBOARD09, -1);
+      // addSprite(100, SPRITES.BILLBOARD01, -1);
+      // addSprite(120, SPRITES.BILLBOARD02, -1);
+      // addSprite(140, SPRITES.BILLBOARD03, -1);
+      // addSprite(160, SPRITES.BILLBOARD04, -1);
+      // addSprite(180, SPRITES.BILLBOARD05, -1);
 
-      addSprite(240,                  SPRITES.BILLBOARD07, -1.2);
-      addSprite(240,                  SPRITES.BILLBOARD06,  1.2);
-      addSprite(segments.length - 25, SPRITES.BILLBOARD07, -1.2);
-      addSprite(segments.length - 25, SPRITES.BILLBOARD06,  1.2);
+      // addSprite(240,                  SPRITES.BILLBOARD07, -1.2);
+      // addSprite(240,                  SPRITES.BILLBOARD06,  1.2);
+      // addSprite(segments.length - 25, SPRITES.BILLBOARD07, -1.2);
+      // addSprite(segments.length - 25, SPRITES.BILLBOARD06,  1.2);
 
-      for(n = 10 ; n < 200 ; n += 4 + Math.floor(n/100)) {
-        addSprite(n, SPRITES.PALM_TREE, 0.5 + Math.random()*0.5);
-        addSprite(n, SPRITES.PALM_TREE,   1 + Math.random()*2);
-      }
+      // for(n = 10 ; n < 200 ; n += 4 + Math.floor(n/100)) {
+      //   addSprite(n, SPRITES.PALM_TREE, 0.5 + Math.random()*0.5);
+      //   addSprite(n, SPRITES.PALM_TREE,   1 + Math.random()*2);
+      // }
 
-      for(n = 250 ; n < 1000 ; n += 5) {
-        addSprite(n,     SPRITES.COLUMN, 1.1);
-        addSprite(n + Util.randomInt(0,5), SPRITES.TREE1, -1 - (Math.random() * 2));
-        addSprite(n + Util.randomInt(0,5), SPRITES.TREE2, -1 - (Math.random() * 2));
-      }
+      // for(n = 250 ; n < 1000 ; n += 5) {
+      //   addSprite(n,     SPRITES.COLUMN, 1.1);
+      //   addSprite(n + Util.randomInt(0,5), SPRITES.TREE1, -1 - (Math.random() * 2));
+      //   addSprite(n + Util.randomInt(0,5), SPRITES.TREE2, -1 - (Math.random() * 2));
+      // }
 
-      for(n = 200 ; n < segments.length ; n += 3) {
-        addSprite(n, Util.randomChoice(SPRITES.PLANTS), Util.randomChoice([1,-1]) * (2 + Math.random() * 5));
-      }
+      // for(n = 200 ; n < segments.length ; n += 3) {
+      //   addSprite(n, Util.randomChoice(SPRITES.PLANTS), Util.randomChoice([1,-1]) * (2 + Math.random() * 5));
+      // }
 
-      var side, sprite, offset;
-      for(n = 1000 ; n < (segments.length-50) ; n += 100) {
-        side      = Util.randomChoice([1, -1]);
-        addSprite(n + Util.randomInt(0, 50), Util.randomChoice(SPRITES.BILLBOARDS), -side);
-        for(i = 0 ; i < 20 ; i++) {
-          sprite = Util.randomChoice(SPRITES.PLANTS);
-          offset = side * (1.5 + Math.random());
-          addSprite(n + Util.randomInt(0, 50), sprite, offset);
-        }
+      // var side, sprite, offset;
+      // for(n = 1000 ; n < (segments.length-50) ; n += 100) {
+      //   side      = Util.randomChoice([1, -1]);
+      //   addSprite(n + Util.randomInt(0, 50), Util.randomChoice(SPRITES.BILLBOARDS), -side);
+      //   for(i = 0 ; i < 20 ; i++) {
+      //     sprite = Util.randomChoice(SPRITES.PLANTS);
+      //     offset = side * (1.5 + Math.random());
+      //     addSprite(n + Util.randomInt(0, 50), sprite, offset);
+      //   }
           
-      }
+      // }
 
     }
 

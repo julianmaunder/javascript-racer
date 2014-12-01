@@ -2,6 +2,8 @@
 // minimalist DOM helpers
 //=========================================================================
 
+var active = false;
+
 var Dom = {
 
   get:  function(id)                     { return ((id instanceof HTMLElement) || (id === document)) ? id : document.getElementById(id); },
@@ -131,7 +133,6 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
         requestAnimationFrame(frame, canvas);
       }
       frame(); // lets get this party started
-      Game.playMusic();
     });
   },
 
@@ -280,7 +281,7 @@ var Render = {
     var sourceH = imageH;
     
     var destX = 0;
-    var destY = offset;
+    var destY = 0;
     var destW = Math.floor(width * (sourceW/imageW));
     var destH = height;
 
@@ -355,12 +356,12 @@ var KEY = {
 
 var COLORS = {
   SKY:  '#72D7EE',
-  TREE: '#005108',
-  FOG:  '#005108',
-  LIGHT:  { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC'  },
-  DARK:   { road: '#696969', grass: '#009A00', rumble: '#BBBBBB'                   },
-  START:  { road: 'white',   grass: 'white',   rumble: 'white'                     },
-  FINISH: { road: 'black',   grass: 'black',   rumble: 'black'                     }
+  TREE: '#e7e7df',
+  FOG:  '#e7e7df',
+  LIGHT:  { road: '#e7e7df', grass: '#e7e7df', rumble: '#e7e7df', lane: '#e7e7df'  },
+  DARK:   { road: '#e7e7df', grass: '#e7e7df', rumble: '#d1d8d0'                   },
+  START:  { road: 'e7e7df',   grass: 'e7e7df',   rumble: 'e7e7df'                     },
+  FINISH: { road: 'e7e7df',   grass: 'e7e7df',   rumble: 'e7e7df'                     }
 };
 
 var BACKGROUND = {
@@ -370,7 +371,7 @@ var BACKGROUND = {
 };
 
 var SPRITES = {
-  PALM_TREE:              { x:    5, y:    5, w:  215, h:  540 },
+  PALM_TREE:              { x:    5, y:    5, w:  215, h:  2440 },
   BILLBOARD08:            { x:  230, y:    5, w:  385, h:  265 },
   TREE1:                  { x:  625, y:    5, w:  360, h:  360 },
   DEAD_TREE1:             { x:    5, y:  555, w:  135, h:  332 },

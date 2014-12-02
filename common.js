@@ -360,8 +360,8 @@ var COLORS = {
   FOG:  '#e7e7df',
   LIGHT:  { road: '#e7e7df', grass: '#e7e7df', rumble: '#e7e7df', lane: '#e7e7df'  },
   DARK:   { road: '#e7e7df', grass: '#e7e7df', rumble: '#d1d8d0'                   },
-  START:  { road: 'e7e7df',   grass: 'e7e7df',   rumble: 'e7e7df'                     },
-  FINISH: { road: 'e7e7df',   grass: 'e7e7df',   rumble: 'e7e7df'                     }
+  START:  { road: '#e7e7df',   grass: '#e7e7df',   rumble: '#e7e7df'                  },
+  FINISH: { road: '#e7e7df',   grass: '#e7e7df',   rumble: '#e7e7df'                  }
 };
 
 var BACKGROUND = {
@@ -370,8 +370,10 @@ var BACKGROUND = {
   TREES: { x:   5, y: 985, w: 1280, h: 480 }
 };
 
+//to get tops of trees hidden sprites must be 1600+ px tall
+
 var SPRITES = {
-  PALM_TREE:              { x: 1500, y:    0, w: 1550, h: 5000 },
+  PALM_TREE:              { x:    0, y:    0, w:  200, h: 1600 },
   BILLBOARD08:            { x:  230, y:    5, w:  385, h:  265 },
   TREE1:                  { x:  625, y:    5, w:  360, h:  360 },
   DEAD_TREE1:             { x:    5, y:  555, w:  135, h:  332 },
@@ -439,10 +441,10 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     var rumbleLength   = 3;                       // number of segments per red/white rumble strip
     var trackLength    = null;                    // z length of entire track (computed)
     var lanes          = 3;                       // number of lanes
-    var fieldOfView    = 100;                     // angle (degrees) for field of view
+    var fieldOfView    = 80;                     // angle (degrees) for field of view
     var cameraHeight   = 1000;                    // z height of camera
     var cameraDepth    = null;                    // z distance camera is from screen (computed)
-    var drawDistance   = 300;                     // number of segments to draw
+    var drawDistance   = 500;                     // number of segments to draw
     var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
     var playerZ        = null;                    // player relative z distance from camera (computed)
     var fogDensity     = 1;                       // exponential fog density
@@ -517,7 +519,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
 
         for(n = 0 ; n < playerSegment.sprites.length ; n++) {
           sprite  = playerSegment.sprites[n];
-          spriteW = sprite.source.w * SPRITES.SCALE;
+          spriteW = sprite.source.w;
           if (Util.overlap(playerX, playerW, sprite.offset + spriteW/2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
             // speed = maxSpeed/5;
             // position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength); // stop in front of sprite (at front of segment)
@@ -558,6 +560,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
         if (currentLapTime && (startPosition < playerZ)) {
           lastLapTime    = currentLapTime;
           currentLapTime = 0;
+          cars.length = 0;
           resetCars();
           if (lastLapTime <= Util.toFloat(Dom.storage.fast_lap_time)) {
             Dom.storage.fast_lap_time = lastLapTime;
@@ -735,7 +738,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
 
         for(i = 0 ; i < segment.sprites.length ; i++) {
           sprite      = segment.sprites[i];
-          spriteScale = segment.p1.screen.scale;
+          spriteScale = segment.p1.screen.scale * 10;
           spriteX     = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width/2);
           spriteY     = segment.p1.screen.y;
           Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
@@ -853,14 +856,13 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     function resetRoad() {
       segments = [];
 
-      addStraight(ROAD.LENGTH.SHORT);
+      addHill(ROAD.LENGTH.SHORT, -ROAD.HILL.HARD);
       addLowRollingHills();
       addSCurves();
       addCurve(ROAD.LENGTH.MEDIUM, ROAD.CURVE.MEDIUM, ROAD.HILL.LOW);
       addBumps();
       addLowRollingHills();
       addCurve(ROAD.LENGTH.LONG*2, ROAD.CURVE.MEDIUM, ROAD.HILL.MEDIUM);
-      addStraight();
       addHill(ROAD.LENGTH.MEDIUM, ROAD.HILL.HIGH);
       addSCurves();
       addCurve(ROAD.LENGTH.LONG, -ROAD.CURVE.MEDIUM, ROAD.HILL.NONE);
@@ -868,7 +870,6 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       addCurve(ROAD.LENGTH.LONG, ROAD.CURVE.MEDIUM, -ROAD.HILL.LOW);
       addBumps();
       addHill(ROAD.LENGTH.LONG, -ROAD.HILL.MEDIUM);
-      addStraight();
       addSCurves();
       addDownhillToEnd();
 
@@ -886,7 +887,6 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     function resetSprites() {
       var n, i;
 
-      addSprite(700,  SPRITES.PALM_TREE, 1);
       // addSprite(40,  SPRITES.BILLBOARD06, -1);
       // addSprite(60,  SPRITES.BILLBOARD08, -1);
       // addSprite(80,  SPRITES.BILLBOARD09, -1);
@@ -894,14 +894,14 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       // addSprite(120, SPRITES.BILLBOARD02, -1);
       // addSprite(140, SPRITES.BILLBOARD03, -1);
       // addSprite(160, SPRITES.BILLBOARD04, -1);
-      // addSprite(180, SPRITES.BILLBOARD05, -1);
+      addSprite(1500, SPRITES.PALM_TREE, -1);
 
       // addSprite(240,                  SPRITES.BILLBOARD07, -1.2);
       // addSprite(240,                  SPRITES.BILLBOARD06,  1.2);
       // addSprite(segments.length - 25, SPRITES.BILLBOARD07, -1.2);
       // addSprite(segments.length - 25, SPRITES.BILLBOARD06,  1.2);
 
-      // for(n = 10 ; n < 200 ; n += 4 + Math.floor(n/100)) {
+      // for(n = 10 ; n < 1000 ; n += 20 + Math.floor(n/100)) {
       //   addSprite(n, SPRITES.PALM_TREE, 0.5 + Math.random()*0.5);
       //   addSprite(n, SPRITES.PALM_TREE,   1 + Math.random()*2);
       // }
@@ -917,15 +917,14 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       // }
 
       // var side, sprite, offset;
-      // for(n = 1000 ; n < (segments.length-50) ; n += 100) {
-      //   side      = Util.randomChoice([1, -1]);
+      // for(n = 200 ; n < (segments.length-50) ; n += 100) {
+      //   side      = Util.randomChoice([0.5, -0.5]);
       //   addSprite(n + Util.randomInt(0, 50), Util.randomChoice(SPRITES.BILLBOARDS), -side);
       //   for(i = 0 ; i < 20 ; i++) {
       //     sprite = Util.randomChoice(SPRITES.PLANTS);
       //     offset = side * (1.5 + Math.random());
       //     addSprite(n + Util.randomInt(0, 50), sprite, offset);
       //   }
-          
       // }
 
     }

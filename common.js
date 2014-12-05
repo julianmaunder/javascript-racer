@@ -468,6 +468,8 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     var keySlower      = false;
     var straight       = true;
 
+    var poofSound = new Audio("audio/poof.ogg");
+
     var hud = {
       speed:            { value: null, dom: Dom.get('speed_value')            },
       current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
@@ -538,6 +540,9 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
             car.offset = 1000;
             score += 1;
             console.log(score);
+            poofSound.pause();
+            poofSound.currentTime = 0;
+            poofSound.play();
               if ($('.feather-animation').hasClass('feather-pop2')) {
                 $('.feather-animation').addClass('feather-pop').removeClass('feather-pop2');
                } else {
@@ -560,17 +565,19 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
         if (currentLapTime && (startPosition < playerZ)) {
           lastLapTime    = currentLapTime;
           currentLapTime = 0;
-          cars.length = 0;
-          resetCars();
           if (lastLapTime <= Util.toFloat(Dom.storage.fast_lap_time)) {
             Dom.storage.fast_lap_time = lastLapTime;
             updateHud('fast_lap_time', formatTime(lastLapTime));
             Dom.addClassName('fast_lap_time', 'fastest');
             Dom.addClassName('last_lap_time', 'fastest');
+            cars.length = 0;
+            resetCars();
           }
           else {
             Dom.removeClassName('fast_lap_time', 'fastest');
             Dom.removeClassName('last_lap_time', 'fastest');
+            cars.length = 0;
+            resetCars();
           }
           updateHud('last_lap_time', formatTime(lastLapTime));
           Dom.show('last_lap_time');
@@ -1030,3 +1037,6 @@ $('#start').click(function(){
   start();
   this.remove();
 });
+
+
+

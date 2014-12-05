@@ -373,9 +373,7 @@ var BACKGROUND = {
 //to get tops of trees hidden sprites must be 1600+ px tall
 
 var SPRITES = {
-  PALM_TREE:              { x:    0, y:    0, w:  200, h: 1600 },
-  BILLBOARD08:            { x:  230, y:    5, w:  385, h:  265 },
-  TREE1:                  { x:  625, y:    5, w:  360, h:  360 },
+  TREE1:                  { x:    0, y:    0, w:  500, h: 1700 },
   DEAD_TREE1:             { x:    5, y:  555, w:  135, h:  332 },
   BILLBOARD09:            { x:  150, y:  555, w:  328, h:  282 },
   BOULDER3:               { x:  230, y:  280, w:  320, h:  220 },
@@ -397,19 +395,19 @@ var SPRITES = {
   STUMP:                  { x:  995, y:  330, w:  195, h:  140 },
   SEMI:                   { x: 1365, y:  490, w:  122, h:  144 },
   TRUCK:                  { x: 1365, y:  644, w:  100, h:   78 },
-  CAR03:                  { x: 1383, y:  760, w:   88, h:   55 },
-  CAR02:                  { x: 1383, y:  825, w:   80, h:   59 },
-  CAR04:                  { x: 1383, y:  894, w:   80, h:   57 },
-  CAR01:                  { x: 1205, y: 1018, w:   80, h:   56 },
-  PLAYER_UPHILL_LEFT:     { x: 1383, y:  961, w:   80, h:   45 },
-  PLAYER_UPHILL_STRAIGHT: { x: 1295, y: 1018, w:   80, h:   45 },
-  PLAYER_UPHILL_RIGHT:    { x: 1385, y: 1018, w:   80, h:   45 },
-  PLAYER_LEFT:            { x:  995, y:  480, w:   80, h:   41 },
-  PLAYER_STRAIGHT:        { x: 1085, y:  480, w:   80, h:   41 },
-  PLAYER_RIGHT:           { x:  995, y:  531, w:   80, h:   41 }
+  CAR03:                  { x:  500, y:   60, w:   55, h:   45 },
+  CAR02:                  { x:  500, y:   60, w:   55, h:   45 },
+  CAR04:                  { x:  500, y:    0, w:   55, h:   60 },
+  CAR01:                  { x:  500, y:    0, w:   55, h:   60 },
+  PLAYER_UPHILL_LEFT:     { x:  300, y:    0, w:   55, h:   60 },
+  PLAYER_UPHILL_STRAIGHT: { x:  300, y:    0, w:   55, h:   60 },
+  PLAYER_UPHILL_RIGHT:    { x:  300, y:    0, w:   55, h:   60 },
+  PLAYER_LEFT:            { x:  300, y:    0, w:   55, h:   60 },
+  PLAYER_STRAIGHT:        { x:  300, y:    0, w:   55, h:   60 },
+  PLAYER_RIGHT:           { x:  300, y:    0, w:   55, h:   60 }
 };
 
-SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
+SPRITES.SCALE = 0.2 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
 
 SPRITES.BILLBOARDS = [SPRITES.BILLBOARD01, SPRITES.BILLBOARD02, SPRITES.BILLBOARD03, SPRITES.BILLBOARD04, SPRITES.BILLBOARD05, SPRITES.BILLBOARD06, SPRITES.BILLBOARD07, SPRITES.BILLBOARD08, SPRITES.BILLBOARD09];
 SPRITES.PLANTS     = [SPRITES.TREE1, SPRITES.TREE2, SPRITES.DEAD_TREE1, SPRITES.DEAD_TREE2, SPRITES.PALM_TREE, SPRITES.BUSH1, SPRITES.BUSH2, SPRITES.CACTUS, SPRITES.STUMP, SPRITES.BOULDER1, SPRITES.BOULDER2, SPRITES.BOULDER3];
@@ -444,14 +442,14 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     var fieldOfView    = 80;                     // angle (degrees) for field of view
     var cameraHeight   = 1000;                    // z height of camera
     var cameraDepth    = null;                    // z distance camera is from screen (computed)
-    var drawDistance   = 500;                     // number of segments to draw
+    var drawDistance   = 1000;                     // number of segments to draw
     var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
     var playerZ        = null;                    // player relative z distance from camera (computed)
     var fogDensity     = 1;                       // exponential fog density
     var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
     var speed          = 0;                       // current speed
     var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
-    var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
+    var accel          =  maxSpeed/4;             // acceleration rate - tuned until it 'felt' right
     var breaking       = -maxSpeed;               // deceleration rate when braking
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
@@ -488,7 +486,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       var playerSegment = findSegment(position+playerZ);
       var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
       var speedPercent  = speed/maxSpeed;
-      var dx            = dt * 2 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
+      var dx            = dt * 3 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
       var startPosition = position;
 
       updateCars(dt, playerSegment, playerW);
@@ -901,7 +899,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       // addSprite(120, SPRITES.BILLBOARD02, -1);
       // addSprite(140, SPRITES.BILLBOARD03, -1);
       // addSprite(160, SPRITES.BILLBOARD04, -1);
-      addSprite(1500, SPRITES.PALM_TREE, -1);
+         addSprite(500, SPRITES.TREE1, -1);
 
       // addSprite(240,                  SPRITES.BILLBOARD07, -1.2);
       // addSprite(240,                  SPRITES.BILLBOARD06,  1.2);
@@ -913,14 +911,14 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       //   addSprite(n, SPRITES.PALM_TREE,   1 + Math.random()*2);
       // }
 
-      // for(n = 250 ; n < 1000 ; n += 5) {
-      //   addSprite(n,     SPRITES.COLUMN, 1.1);
-      //   addSprite(n + Util.randomInt(0,5), SPRITES.TREE1, -1 - (Math.random() * 2));
-      //   addSprite(n + Util.randomInt(0,5), SPRITES.TREE2, -1 - (Math.random() * 2));
-      // }
+      for(n = 250 ; n < 5000 ; n += 500) {
+        // addSprite(n,     SPRITES.COLUMN, 1.1);
+        addSprite(n + Util.randomInt(0,5), SPRITES.TREE1, -1);
+        addSprite(n + Util.randomInt(0,5), SPRITES.TREE1, Util.randomInt(0,5));
+      }
 
       // for(n = 200 ; n < segments.length ; n += 3) {
-      //   addSprite(n, Util.randomChoice(SPRITES.PLANTS), Util.randomChoice([1,-1]) * (2 + Math.random() * 5));
+      //   addSprite(n, SPRITES.TREE1, Util.randomChoice([1,-1]) * (2 + Math.random() * 5));
       // }
 
       // var side, sprite, offset;

@@ -357,7 +357,7 @@ var KEY = {
 var COLORS = {
   SKY:  '#72D7EE',
   TREE: '#e7e7df',
-  FOG:  '#dddddd',
+  FOG:  '#cfccdf',
   LIGHT:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef', lane: '#efefef'  },
   DARK:   { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'                   },
   START:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'               },
@@ -426,7 +426,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     var drawDistance   = 1000;                     // number of segments to draw
     var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
     var playerZ        = null;                    // player relative z distance from camera (computed)
-    var fogDensity     = 10;                       // exponential fog density
+    var fogDensity     = 20;                       // exponential fog density
     var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
     var speed          = 0;                       // current speed
     var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)

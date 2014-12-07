@@ -357,11 +357,11 @@ var KEY = {
 var COLORS = {
   SKY:  '#72D7EE',
   TREE: '#e7e7df',
-  FOG:  '#e7e7df',
-  LIGHT:  { road: '#e7e7df', grass: '#e7e7df', rumble: '#e7e7df', lane: '#e7e7df'  },
-  DARK:   { road: '#e7e7df', grass: '#e7e7df', rumble: '#d1d8d0'                   },
-  START:  { road: '#e7e7df',   grass: '#e7e7df',   rumble: '#e7e7df'                  },
-  FINISH: { road: '#e7e7df',   grass: '#e7e7df',   rumble: '#e7e7df'                  }
+  FOG:  '#dddddd',
+  LIGHT:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef', lane: '#efefef'  },
+  DARK:   { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'                   },
+  START:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'               },
+  FINISH: { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'               }
 };
 
 var BACKGROUND = {
@@ -373,45 +373,26 @@ var BACKGROUND = {
 //to get tops of trees hidden sprites must be 1600+ px tall
 
 var SPRITES = {
-  TREE1:                  { x:    0, y:    0, w:  500, h: 1700 },
-  DEAD_TREE1:             { x:    5, y:  555, w:  135, h:  332 },
-  BILLBOARD09:            { x:  150, y:  555, w:  328, h:  282 },
-  BOULDER3:               { x:  230, y:  280, w:  320, h:  220 },
-  COLUMN:                 { x:  995, y:    5, w:  200, h:  315 },
-  BILLBOARD01:            { x:  625, y:  375, w:  300, h:  170 },
-  BILLBOARD06:            { x:  488, y:  555, w:  298, h:  190 },
-  BILLBOARD05:            { x:    5, y:  897, w:  298, h:  190 },
-  BILLBOARD07:            { x:  313, y:  897, w:  298, h:  190 },
-  BOULDER2:               { x:  621, y:  897, w:  298, h:  140 },
-  TREE2:                  { x: 1205, y:    5, w:  282, h:  295 },
-  BILLBOARD04:            { x: 1205, y:  310, w:  268, h:  170 },
-  DEAD_TREE2:             { x: 1205, y:  490, w:  150, h:  260 },
-  BOULDER1:               { x: 1205, y:  760, w:  168, h:  248 },
-  BUSH1:                  { x:    5, y: 1097, w:  240, h:  155 },
-  CACTUS:                 { x:  929, y:  897, w:  235, h:  118 },
-  BUSH2:                  { x:  255, y: 1097, w:  232, h:  152 },
-  BILLBOARD03:            { x:    5, y: 1262, w:  230, h:  220 },
-  BILLBOARD02:            { x:  245, y: 1262, w:  215, h:  220 },
-  STUMP:                  { x:  995, y:  330, w:  195, h:  140 },
-  SEMI:                   { x: 1365, y:  490, w:  122, h:  144 },
-  TRUCK:                  { x: 1365, y:  644, w:  100, h:   78 },
-  CAR03:                  { x:  500, y:   60, w:   55, h:   45 },
+  TREE1:                  { x:    0, y:    0, w:  500, h: 1710 },
+  TREE2:                  { x:  560, y:    0, w:  740, h: 1730 },
+  TREE3:                  { x: 1300, y:    0, w:  300, h: 1730 },
+  LOG:                    { x:    0, y: 1760, w:  450, h:   90 },
+  CAR03:                  { x:  500, y:  105, w:   55, h:   35 },
   CAR02:                  { x:  500, y:   60, w:   55, h:   45 },
   CAR04:                  { x:  500, y:    0, w:   55, h:   60 },
   CAR01:                  { x:  500, y:    0, w:   55, h:   60 },
-  PLAYER_UPHILL_LEFT:     { x:  300, y:    0, w:   55, h:   60 },
-  PLAYER_UPHILL_STRAIGHT: { x:  300, y:    0, w:   55, h:   60 },
-  PLAYER_UPHILL_RIGHT:    { x:  300, y:    0, w:   55, h:   60 },
-  PLAYER_LEFT:            { x:  300, y:    0, w:   55, h:   60 },
-  PLAYER_STRAIGHT:        { x:  300, y:    0, w:   55, h:   60 },
-  PLAYER_RIGHT:           { x:  300, y:    0, w:   55, h:   60 }
+  PLAYER_UPHILL_LEFT:     { x:  300, y:    0, w:   60, h:  150 },
+  PLAYER_UPHILL_STRAIGHT: { x:  300, y:    0, w:   60, h:  150 },
+  PLAYER_UPHILL_RIGHT:    { x:  300, y:    0, w:   60, h:  150 },
+  PLAYER_LEFT:            { x:  300, y:    0, w:   60, h:  150 },
+  PLAYER_STRAIGHT:        { x:  300, y:    0, w:   60, h:  150 },
+  PLAYER_RIGHT:           { x:  300, y:    0, w:   60, h:  150 }
 };
 
 SPRITES.SCALE = 0.2 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
 
-SPRITES.BILLBOARDS = [SPRITES.BILLBOARD01, SPRITES.BILLBOARD02, SPRITES.BILLBOARD03, SPRITES.BILLBOARD04, SPRITES.BILLBOARD05, SPRITES.BILLBOARD06, SPRITES.BILLBOARD07, SPRITES.BILLBOARD08, SPRITES.BILLBOARD09];
-SPRITES.PLANTS     = [SPRITES.TREE1, SPRITES.TREE2, SPRITES.DEAD_TREE1, SPRITES.DEAD_TREE2, SPRITES.PALM_TREE, SPRITES.BUSH1, SPRITES.BUSH2, SPRITES.CACTUS, SPRITES.STUMP, SPRITES.BOULDER1, SPRITES.BOULDER2, SPRITES.BOULDER3];
-SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04, SPRITES.SEMI, SPRITES.TRUCK];
+SPRITES.PLANTS     = [SPRITES.TREE1, SPRITES.TREE2, SPRITES.TREE3];
+SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04];
 
 
     var fps            = 60;                      // how many 'update' frames per second
@@ -440,16 +421,16 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     var trackLength    = null;                    // z length of entire track (computed)
     var lanes          = 3;                       // number of lanes
     var fieldOfView    = 80;                     // angle (degrees) for field of view
-    var cameraHeight   = 1000;                    // z height of camera
+    var cameraHeight   = 400;                    // z height of camera
     var cameraDepth    = null;                    // z distance camera is from screen (computed)
     var drawDistance   = 1000;                     // number of segments to draw
     var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
     var playerZ        = null;                    // player relative z distance from camera (computed)
-    var fogDensity     = 1;                       // exponential fog density
+    var fogDensity     = 10;                       // exponential fog density
     var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
     var speed          = 0;                       // current speed
     var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
-    var accel          =  maxSpeed/4;             // acceleration rate - tuned until it 'felt' right
+    var accel          =  maxSpeed/8;             // acceleration rate - tuned until it 'felt' right
     var breaking       = -maxSpeed;               // deceleration rate when braking
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
@@ -458,6 +439,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
     var score          = 0;
+    var birds          = 0;
     var combo          = true;
 
     var keyLeft        = false;
@@ -465,8 +447,6 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     var keyFaster      = false;
     var keySlower      = false;
     var straight       = true;
-
-    var poofSound = new Audio("audio/poof.ogg");
 
     var hud = {
       speed:            { value: null, dom: Dom.get('speed_value')            },
@@ -488,6 +468,8 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       var speedPercent  = speed/maxSpeed;
       var dx            = dt * 3 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
       var startPosition = position;
+
+      score += 1;
 
       updateCars(dt, playerSegment, playerW);
 
@@ -532,12 +514,12 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
         car  = playerSegment.cars[n];
         carW = car.sprite.w * SPRITES.SCALE;
         if (speed > car.speed) {
-          if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
+          if (Util.overlap(playerX, playerW, car.offset, carW * 2, 0.8)) {
             // speed    = car.speed * (car.speed/speed);
             // position = Util.increase(car.z, -playerZ, trackLength)
             car.offset = 1000;
-            score += 1;
-            console.log(score);
+            birds += 1;
+            console.log(birds);
             poofSound.pause();
             poofSound.currentTime = 0;
             poofSound.play();
@@ -585,8 +567,8 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
         }
       }
 
-      updateHud('speed',            (score));
-      updateHud('current_lap_time', formatTime(currentLapTime));
+      updateHud('speed',            score);
+      updateHud('current_lap_time', birds);
     }
 
     //-------------------------------------------------------------------------
@@ -870,16 +852,17 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       addCurve(ROAD.LENGTH.LONG*2, ROAD.CURVE.MEDIUM, ROAD.HILL.MEDIUM);
       addHill(ROAD.LENGTH.MEDIUM, ROAD.HILL.HIGH);
       addSCurves();
-      addCurve(ROAD.LENGTH.LONG, -ROAD.CURVE.MEDIUM, ROAD.HILL.NONE);
+      addCurve(ROAD.LENGTH.SHORT, -ROAD.CURVE.MEDIUM, ROAD.HILL.NONE);
       addHill(ROAD.LENGTH.LONG, ROAD.HILL.HIGH);
+      addSCurves();
       addCurve(ROAD.LENGTH.LONG, ROAD.CURVE.MEDIUM, -ROAD.HILL.LOW);
       addBumps();
       addHill(ROAD.LENGTH.LONG, -ROAD.HILL.MEDIUM);
-      addSCurves();
       addDownhillToEnd();
 
       resetSprites();
       resetCars();
+      gameSound.play();
 
       segments[findSegment(playerZ).index + 2].color = COLORS.START;
       segments[findSegment(playerZ).index + 3].color = COLORS.START;
@@ -898,28 +881,39 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
       // addSprite(100, SPRITES.BILLBOARD01, -1);
       // addSprite(120, SPRITES.BILLBOARD02, -1);
       // addSprite(140, SPRITES.BILLBOARD03, -1);
-      // addSprite(160, SPRITES.BILLBOARD04, -1);
-         addSprite(500, SPRITES.TREE1, -1);
+      addSprite(900, SPRITES.TREE2, -2);
+      addSprite(1000, SPRITES.TREE1, -3);
+      addSprite(1000, SPRITES.LOG, -1);
 
       // addSprite(240,                  SPRITES.BILLBOARD07, -1.2);
       // addSprite(240,                  SPRITES.BILLBOARD06,  1.2);
       // addSprite(segments.length - 25, SPRITES.BILLBOARD07, -1.2);
       // addSprite(segments.length - 25, SPRITES.BILLBOARD06,  1.2);
 
-      // for(n = 10 ; n < 1000 ; n += 20 + Math.floor(n/100)) {
-      //   addSprite(n, SPRITES.PALM_TREE, 0.5 + Math.random()*0.5);
-      //   addSprite(n, SPRITES.PALM_TREE,   1 + Math.random()*2);
-      // }
+      for(n = 10 ; n < 1000 ; n += 500 + Math.floor(n/100)) {
+        addSprite(n, SPRITES.TREE1, 0.5 + Math.random()*0.5);
+        addSprite(n, SPRITES.TREE2,   1 + Math.random()*2);
+      }
+
+       for(n = 10 ; n < 1000 ; n += 200 + Math.floor(n/100)) {
+        addSprite(n, SPRITES.TREE1, -2 + Math.random()*0.5);
+        addSprite(n, SPRITES.TREE2,   -4 + Math.random()*2);
+      }
+
 
       for(n = 250 ; n < 5000 ; n += 500) {
         // addSprite(n,     SPRITES.COLUMN, 1.1);
-        addSprite(n + Util.randomInt(0,5), SPRITES.TREE1, -1);
-        addSprite(n + Util.randomInt(0,5), SPRITES.TREE1, Util.randomInt(0,5));
+        addSprite(n + Util.randomInt(3,5), SPRITES.TREE1, -1);
+        addSprite(n + Util.randomInt(3,5), SPRITES.TREE1,  1);
       }
 
-      // for(n = 200 ; n < segments.length ; n += 3) {
-      //   addSprite(n, SPRITES.TREE1, Util.randomChoice([1,-1]) * (2 + Math.random() * 5));
-      // }
+      for(n = 200 ; n < segments.length ; n += 200) {
+        addSprite(n, SPRITES.TREE2, Util.randomChoice([0,0]) * (2 + Math.random() * 5));
+      }
+
+      for(n = 200 ; n < segments.length ; n += 500) {
+        addSprite(n, SPRITES.TREE3, Util.randomChoice([-0.2,0.2]) * (2 + Math.random() * 5));
+      }
 
       // var side, sprite, offset;
       // for(n = 200 ; n < (segments.length-50) ; n += 100) {
@@ -937,7 +931,7 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     function resetCars() {
       cars = [];
       var n, car, segment, offset, z, sprite, speed;
-      for (var n = 0 ; n < totalCars ; n++) {
+      for (var n = 50 ; n < totalCars ; n++) {
         offset = Math.random() * Util.randomChoice([-0.8, 0.8]);
         z      = Math.floor(Math.random() * segments.length) * segmentLength;
         sprite = Util.randomChoice(SPRITES.CARS);
@@ -1030,6 +1024,9 @@ SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04
     //=========================================================================
 
   }
+
+var poofSound = new Audio("audio/poof.wav");
+var gameSound = new Audio("audio/game.mp3");
 
 $('#start').click(function(){
   start();

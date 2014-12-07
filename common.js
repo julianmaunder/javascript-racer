@@ -377,7 +377,7 @@ var SPRITES = {
   TREE2:                  { x:  560, y:    0, w:  740, h: 1730 },
   TREE3:                  { x: 1300, y:    0, w:  300, h: 1730 },
   LOG:                    { x:    0, y: 1760, w:  880, h:   90 },
-  STUMP1:                 { x:  880, y: 1760, w:  135, h:   90 },
+  STUMP1:                 { x:  880, y: 1760, w:  135, h:  150 },
   CAR03:                  { x:  500, y:  105, w:   55, h:   35 },
   CAR02:                  { x:  500, y:   60, w:   55, h:   45 },
   CAR04:                  { x:  500, y:    0, w:   55, h:   55 },
@@ -540,29 +540,30 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         stump  = playerSegment.stumps[n];
         stumpW = stump.sprite.w * SPRITES.SCALE;
         if (speed > stump.speed) {
-          if (Util.overlap(playerX, playerW, stump.offset, stumpW * 2, 0.8)) {
+          if (Util.overlap(playerX, playerW, stump.offset, stumpW, 0.8)) {
             // speed    = car.speed * (car.speed/speed);
             // position = Util.increase(car.z, -playerZ, trackLength)
-            stump.offset = 1000;
-            hearts -= 1;
+            stump = [];
+            hearts--;
             console.log("hearts " + hearts);
             // poofSound.pause();
             // poofSound.currentTime = 0;
             // poofSound.play();
-            if (hearts = 6) {
+            if (hearts === 6) {
               $(".hearts").css("background-position", "-3200px");
-            } else if (hearts = 5) {
+            } else if (hearts === 5) {
               $(".hearts").css("background-position", "-2560px");
-            } else if (hearts = 4) {
+            } else if (hearts === 4) {
               $(".hearts").css("background-position", "-1920px");
-            } else if (hearts = 3) {
+            } else if (hearts === 3) {
               $(".hearts").css("background-position", "-1280px");
-            } else if (hearts = 2) {
+            } else if (hearts === 2) {
               $(".hearts").css("background-position", "-640px");
-            } else if (hearts = 1) {
+            } else if (hearts === 1) {
               $(".hearts").css("background-position", "0");
-            } else {
-              $(".hearts").css("background-position", "-3840px");
+            } else if (hearts === 0) {
+              gameSound.pause();
+              // $("#racer").remove();
             }
             break;
           }

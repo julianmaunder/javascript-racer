@@ -1,3 +1,34 @@
+var myLoader = html5Preloader();
+
+myLoader.addFiles(
+  "audio/poof.wav",
+  "audio/wood.wav", 
+  "audio/game.mp3", 
+  "audio/getheart.wav", 
+  "images/background.png",
+  "images/sprites.png",
+  "images/wolflarge.png",
+  "images/feathers.png",
+  "images/hearts.png",
+  "images/wood.png"
+  );
+
+myLoader.on('finish', function(){
+  alert('All assets loaded.'); 
+});
+
+var poofSound = new Audio("audio/poof.wav");
+var woodSound = new Audio("audio/wood.wav");
+var gameSound = new Audio("audio/game.mp3");
+var heartSound = new Audio("audio/getheart.wav");
+gameSound.loop = true;
+
+$('#start').click(function(){
+  start();
+  this.remove();
+  $('#racer').removeClass("hidden");
+});
+
 function start() {
 
 //=========================================================================
@@ -437,7 +468,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-    var totalCars      = 400;                     // total number of cars on the road
+    var totalCars      = 300;                     // total number of cars on the road
     var totalStumps    = 100;
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
@@ -445,7 +476,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var birds          = 0;
     var maxHearts      = 6;
     var hearts         = 6;
-    var birdHealth     = 0;
+    var birdHealth     = 99;
     var combo          = true;
 
     var keyLeft        = false;
@@ -472,7 +503,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       var playerSegment = findSegment(position+playerZ);
       var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
       var speedPercent  = speed/maxSpeed;
-      var dx            = dt * 3 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
+      var dx            = dt * 4 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
       var startPosition = position;
 
       score += 1;
@@ -526,10 +557,18 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             birds += 1;
             birdHealth += 1;
             if (birdHealth === 100) {
-              birdHealth = 0;
-              hearts += 2;
               if (hearts >= 5) {
                 hearts = maxHearts;
+              } else {
+                hearts += 2;
+              }
+              updateHearts();
+              birdHealth = 0;
+              heartSound.play();
+              if ($('.heart-anim').hasClass('heart-pop2')) {
+                $('.heart-anim').addClass('heart-pop').removeClass('heart-pop2');
+              } else {
+                $('.heart-anim').addClass('heart-pop2').removeClass("heart-pop");
               }
             }
             poofSound.pause();
@@ -550,7 +589,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         stumpW = stump.sprite.w * SPRITES.SCALE;
         if (speed > stump.speed) {
           if (Util.overlap(playerX, playerW, stump.offset, stumpW, 1)) {
-            // speed    = speed * 0.2;
+            speed    = speed * 0.66;
             // position = Util.increase(car.z, -playerZ, trackLength)
             console.log(stump.z);
             playerSegment.stumps.splice();
@@ -563,22 +602,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             } else {
               $('.wood-animation').addClass('wood-pop2').removeClass("wood-pop");
             }
-            if (hearts === 6) {
-              $(".hearts").css("background-position", "-3200px");
-            } else if (hearts === 5) {
-              $(".hearts").css("background-position", "-2560px");
-            } else if (hearts === 4) {
-              $(".hearts").css("background-position", "-1920px");
-            } else if (hearts === 3) {
-              $(".hearts").css("background-position", "-1280px");
-            } else if (hearts === 2) {
-              $(".hearts").css("background-position", "-640px");
-            } else if (hearts === 1) {
-              $(".hearts").css("background-position", "0");
-            } else if (hearts === 0) {
-              gameSound.pause();
-              // $("#racer").remove();
-            }
+            updateHearts();
             break;
           }
         }
@@ -626,6 +650,25 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     }
 
     //-------------------------------------------------------------------------
+
+    function updateHearts() {
+      if (hearts === 6) {
+        $(".hearts").css("background-position", "-3200px");
+      } else if (hearts === 5) {
+        $(".hearts").css("background-position", "-2560px");
+      } else if (hearts === 4) {
+        $(".hearts").css("background-position", "-1920px");
+      } else if (hearts === 3) {
+        $(".hearts").css("background-position", "-1280px");
+      } else if (hearts === 2) {
+        $(".hearts").css("background-position", "-640px");
+      } else if (hearts === 1) {
+        $(".hearts").css("background-position", "0");
+      } else if (hearts === 0) {
+        gameSound.pause();
+        // $("#racer").remove();
+      }
+    }
 
     function updateCars(dt, playerSegment, playerW) {
       var n, car, oldSegment, newSegment;
@@ -1077,7 +1120,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       }
       for (var n = 0 ; n < totalStumps ; n++) {
         offset = Math.random() * Util.randomChoice([-1, 1]);
-        z      = (Math.floor(Math.random() * segments.length) * segmentLength) + 20000;
+        z      = (Math.floor(Math.random() * segments.length) * segmentLength) + 50000;
         sprite = Util.randomChoice(SPRITES.STUMPS);
         speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
         stump = { offset: offset, z: z, sprite: sprite, speed: speed };
@@ -1170,15 +1213,5 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     //=========================================================================
 
   }
-
-var poofSound = new Audio("audio/poof.wav");
-var woodSound = new Audio("audio/wood.wav");
-var gameSound = new Audio("audio/game.mp3");
-gameSound.loop = true;
-
-$('#start').click(function(){
-  start();
-  this.remove();
-});
 
 

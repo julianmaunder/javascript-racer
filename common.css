@@ -139,21 +139,21 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 .wood-pop {
 	background: url('images/wood.png');
 	background-position: 0 0;
-	-webkit-animation: wood 0.3s steps(4); 
+	-webkit-animation: wood 0.5s steps(7); 
 }
 
 .wood-pop2 {
 	background: url('images/wood.png');
 	background-position: 0 0;
-	-webkit-animation: wood2 0.3s steps(4); 
+	-webkit-animation: wood2 0.5s steps(7); 
 }
 
 @-webkit-keyframes wood {
-   	100% { background-position: -2560px 0; }
+   	100% { background-position: -4480px 0; }
 }
 
 @-webkit-keyframes wood2 {
-   	100% { background-position: -2560px 0; }
+   	100% { background-position: -4480px 0; }
 }
 
 .hearts {
@@ -167,4 +167,38 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 	height: 480px;
 	background: url('images/hearts.png');
 	background-position: -3200px 0;
+}
+
+.heart-anim {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 4;
+	width: 640px;
+	height: 480px;
+	background: url('images/getheart.png');
+	background-position: 0 0;
+
+}
+
+.heart-pop {
+	background: url('images/getheart.png');
+	background-position: 0 0;
+	-webkit-animation: heart 0.5s 0.35s steps(7); 
+}
+
+.heart-pop2 {
+	background: url('images/getheart.png');
+	background-position: 0 0;
+	-webkit-animation: heart2 0.5s 0.35s steps(7); 
+}
+
+@-webkit-keyframes heart {
+   	100% { background-position: -4480px 0; }
+}
+
+@-webkit-keyframes heart2 {
+   	100% { background-position: -4480px 0; }
 }

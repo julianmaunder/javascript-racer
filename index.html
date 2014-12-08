@@ -5,6 +5,7 @@
   <title>Breakfast In The Rockies</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <link href="common.css" rel="stylesheet" type="text/css" />
+  <script src="jquery-1.11.1.min.js"></script>
 </head> 
 
 <body> 
@@ -57,7 +58,7 @@
 
   <button id="start">start</button>
 
-  <div id="racer">
+  <div id="racer" class="hidden">
     <span id="speed" class="hud"><span id="speed_value" class="value">0</span></span>
     <span id="current_lap_time" class="hud"><span id="current_lap_time_value" class="value">0</span></span> 
     <div id="hud">
@@ -66,6 +67,7 @@
     </div>
     <div id="wolf" class="wolf-animation straight hidden"> </div>
     <div class="hearts"> </div>
+    <div class="heart-anim"> </div>
     <div class="feather-animation"> </div>
     <div class="wood-animation"> </div>
     <canvas id="canvas">
@@ -79,8 +81,8 @@
   </audio>
   <span id="mute"></span> -->
 
-  <script src="zepto.min.js"></script>
   <script src="stats.js"></script>
+  <script src="preload.js"></script>
   <script src="common.js"></script>
 
 </body> 

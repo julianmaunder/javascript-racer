@@ -1115,7 +1115,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function resetStumps() {
       stumps = [];
       var n, stump, segment, offset, z, sprite, speed;
-      if (totalStumps > 50) {
+      if (totalStumps < 50) {
         totalStumps = totalStumps * 0.5;
       }
       for (var n = 0 ; n < totalStumps ; n++) {

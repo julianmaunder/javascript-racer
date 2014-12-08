@@ -437,13 +437,15 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-    var totalCars      = 100;                     // total number of cars on the road
+    var totalCars      = 400;                     // total number of cars on the road
     var totalStumps    = 100;
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
     var score          = 0;
     var birds          = 0;
+    var maxHearts      = 6;
     var hearts         = 6;
+    var birdHealth     = 0;
     var combo          = true;
 
     var keyLeft        = false;
@@ -522,6 +524,14 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             // position = Util.increase(car.z, -playerZ, trackLength)
             playerSegment.cars.splice();
             birds += 1;
+            birdHealth += 1;
+            if (birdHealth === 100) {
+              birdHealth = 0;
+              hearts += 2;
+              if (hearts >= 5) {
+                hearts = maxHearts;
+              }
+            }
             poofSound.pause();
             poofSound.currentTime = 0;
             poofSound.play();
@@ -542,6 +552,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           if (Util.overlap(playerX, playerW, stump.offset, stumpW, 1)) {
             // speed    = speed * 0.2;
             // position = Util.increase(car.z, -playerZ, trackLength)
+            console.log(stump.z);
             playerSegment.stumps.splice();
             hearts--;
             woodSound.pause();
@@ -1043,6 +1054,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function resetCars() {
       cars = [];
       var n, car, segment, offset, z, sprite, speed;
+      if (totalCars > 50) {
+        totalCars = totalCars * 0.5;
+      }
       for (var n = 50 ; n < totalCars ; n++) {
         offset = Math.random() * Util.randomChoice([-1, 1]);
         z      = Math.floor(Math.random() * segments.length) * segmentLength;
@@ -1058,16 +1072,20 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function resetStumps() {
       stumps = [];
       var n, stump, segment, offset, z, sprite, speed;
-      totalStumps = totalStumps / 2;
+      if (totalStumps > 50) {
+        totalStumps = totalStumps * 0.5;
+      }
       for (var n = 0 ; n < totalStumps ; n++) {
         offset = Math.random() * Util.randomChoice([-1, 1]);
-        z      = Math.floor(Math.random() * segments.length) * segmentLength;
+        z      = (Math.floor(Math.random() * segments.length) * segmentLength) + 20000;
         sprite = Util.randomChoice(SPRITES.STUMPS);
         speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
         stump = { offset: offset, z: z, sprite: sprite, speed: speed };
         segment = findSegment(stump.z);
+        if (z < segments.length * segmentLength) {
         segment.stumps.push(stump);
         stumps.push(stump);
+      }
       }
     }
 

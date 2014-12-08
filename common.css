@@ -122,6 +122,40 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
    	100% { background-position: -5760px 0; }
 }
 
+.wood-animation {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 4;
+	width: 640px;
+	height: 480px;
+	background: url('images/wood.png');
+	background-position: 0 0;
+
+}
+
+.wood-pop {
+	background: url('images/wood.png');
+	background-position: 0 0;
+	-webkit-animation: wood 0.3s steps(4); 
+}
+
+.wood-pop2 {
+	background: url('images/wood.png');
+	background-position: 0 0;
+	-webkit-animation: wood2 0.3s steps(4); 
+}
+
+@-webkit-keyframes wood {
+   	100% { background-position: -2560px 0; }
+}
+
+@-webkit-keyframes wood2 {
+   	100% { background-position: -2560px 0; }
+}
+
 .hearts {
 	position: absolute;
 	top: 0;
@@ -133,5 +167,4 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 	height: 480px;
 	background: url('images/hearts.png');
 	background-position: -3200px 0;
-
 }

@@ -358,10 +358,10 @@ var COLORS = {
   SKY:  '#72D7EE',
   TREE: '#e7e7df',
   FOG:  '#cfccdf',
-  LIGHT:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef', lane: '#efefef'  },
-  DARK:   { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'                   },
-  START:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'               },
-  FINISH: { road: '#efefef',   grass: '#e9e9e9',   rumble: '#efefef'               }
+  LIGHT:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#e9e9e9', lane: '#efefef'  },
+  DARK:   { road: '#efefef',   grass: '#e9e9e9',   rumble: '#e9e9e9'                   },
+  START:  { road: '#efefef',   grass: '#e9e9e9',   rumble: '#e9e9e9'               },
+  FINISH: { road: '#efefef',   grass: '#e9e9e9',   rumble: '#e9e9e9'               }
 };
 
 var BACKGROUND = {
@@ -376,8 +376,8 @@ var SPRITES = {
   TREE1:                  { x:    0, y:    0, w:  500, h: 1710 },
   TREE2:                  { x:  560, y:    0, w:  740, h: 1730 },
   TREE3:                  { x: 1300, y:    0, w:  300, h: 1730 },
-  LOG:                    { x:    0, y: 1760, w:  880, h:   90 },
-  STUMP1:                 { x:  880, y: 1760, w:  135, h:  150 },
+  LOG:                    { x:    0, y: 1760, w:  880, h:  160 },
+  STUMP1:                 { x:  880, y: 1760, w:   75, h:   90 },
   CAR03:                  { x:  500, y:  105, w:   55, h:   35 },
   CAR02:                  { x:  500, y:   60, w:   55, h:   45 },
   CAR04:                  { x:  500, y:    0, w:   55, h:   55 },
@@ -435,8 +435,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var accel          =  maxSpeed/4;             // acceleration rate - tuned until it 'felt' right
     var breaking       = -maxSpeed;               // deceleration rate when braking
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
-    var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
-    var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
+    var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
+    var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
     var totalCars      = 100;                     // total number of cars on the road
     var totalStumps    = 100;
     var currentLapTime = 0;                       // current lap time
@@ -517,12 +517,11 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         car  = playerSegment.cars[n];
         carW = car.sprite.w * SPRITES.SCALE;
         if (speed > car.speed) {
-          if (Util.overlap(playerX, playerW, car.offset, carW * 2, 0.8)) {
+          if (Util.overlap(playerX, playerW, car.offset, carW * 2, 1)) {
             // speed    = car.speed * (car.speed/speed);
             // position = Util.increase(car.z, -playerZ, trackLength)
-            car.offset = 1000;
+            playerSegment.cars.splice();
             birds += 1;
-            console.log(birds);
             poofSound.pause();
             poofSound.currentTime = 0;
             poofSound.play();
@@ -540,15 +539,19 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         stump  = playerSegment.stumps[n];
         stumpW = stump.sprite.w * SPRITES.SCALE;
         if (speed > stump.speed) {
-          if (Util.overlap(playerX, playerW, stump.offset, stumpW, 0.8)) {
-            // speed    = car.speed * (car.speed/speed);
+          if (Util.overlap(playerX, playerW, stump.offset, stumpW, 1)) {
+            // speed    = speed * 0.2;
             // position = Util.increase(car.z, -playerZ, trackLength)
-            stump = [];
+            playerSegment.stumps.splice();
             hearts--;
-            console.log("hearts " + hearts);
-            // poofSound.pause();
-            // poofSound.currentTime = 0;
-            // poofSound.play();
+            woodSound.pause();
+            woodSound.currentTime = 0;
+            woodSound.play();
+            if ($('.wood-animation').hasClass('wood-pop2')) {
+              $('.wood-animation').addClass('wood-pop').removeClass('wood-pop2');
+            } else {
+              $('.wood-animation').addClass('wood-pop2').removeClass("wood-pop");
+            }
             if (hearts === 6) {
               $(".hearts").css("background-position", "-3200px");
             } else if (hearts === 5) {
@@ -1041,7 +1044,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       cars = [];
       var n, car, segment, offset, z, sprite, speed;
       for (var n = 50 ; n < totalCars ; n++) {
-        offset = Math.random() * Util.randomChoice([-0.8, 0.8]);
+        offset = Math.random() * Util.randomChoice([-1, 1]);
         z      = Math.floor(Math.random() * segments.length) * segmentLength;
         sprite = Util.randomChoice(SPRITES.CARS);
         speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
@@ -1051,12 +1054,13 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         cars.push(car);
       }
     }
-    
+
     function resetStumps() {
       stumps = [];
       var n, stump, segment, offset, z, sprite, speed;
-      for (var n = 50 ; n < totalStumps ; n++) {
-        offset = Math.random() * Util.randomChoice([-0.8, 0.8]);
+      totalStumps = totalStumps / 2;
+      for (var n = 0 ; n < totalStumps ; n++) {
+        offset = Math.random() * Util.randomChoice([-1, 1]);
         z      = Math.floor(Math.random() * segments.length) * segmentLength;
         sprite = Util.randomChoice(SPRITES.STUMPS);
         speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
@@ -1150,6 +1154,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
   }
 
 var poofSound = new Audio("audio/poof.wav");
+var woodSound = new Audio("audio/wood.wav");
 var gameSound = new Audio("audio/game.mp3");
 gameSound.loop = true;
 

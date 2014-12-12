@@ -16,13 +16,13 @@
 /* common styles used for v1 through v4 */
 /****************************************/
 
-body          { font-family: Arial, Helvetica, sans-serif; background: #fff; margin: 0; padding: 0; }
+body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; margin: 0; padding: 0; }
 #stats        { border: 2px solid black; }
 #controls     { width: 28em; float: left; padding: 1em; font-size: 0.7em; }
 #controls th  { text-align: right; vertical-align: middle; }
 #instructions { clear: left; float: left; width: 17em; padding: 1em; border: 1px solid black; box-shadow: 0 0 5px black; }
-#racer        { overflow: hidden; position: relative; top: 0; z-index: 0; width: 640px; height: 480px; margin-left: 20em; background: url('images/logo.png'); }
-#canvas       { position: absolute; z-index: 0; width: 640px; height: 480px; z-index: 0; background-color: #ffffff; }
+#racer        {  position: relative; top: 0; left: 50%; z-index: 0; width: 640px; height: 480px; margin-left: -320px; background: url('images/logo.png'); }
+#canvas       { position: absolute; z-index: 0; width: 640px; height: 480px; z-index: 0; background-color: #efefef; }
 #mute         { display:none; background-position:   0px 0px; width: 32px; height: 32px; background: url(images/mute.png); display: inline-block; cursor: pointer; position: absolute; margin-left: 20em; }
 #mute.on      { background-position: -32px 0px; }
 
@@ -30,40 +30,62 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 /* rudimentary heads up display (only used in v4) */
 /**************************************************/
 
-#hud                   { display: none; position: absolute; z-index: 1; width: 640px; padding: 5px 0; font-family: monospace; font-size: 1em; background-color: rgba(255,0,0,0.4); color: black; border-bottom: 2px solid black; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; }
-#hud .hud              { background-color: rgba(255,255,255,0.6); padding: 5px; border: 1px solid black; margin: 0 5px; transition-property: background-color; transition-duration: 2s; -webkit-transition-property: background-color; -webkit-transition-duration: 2s; }
-#speed            	   { display: block; z-index: 2; position: absolute; width: 300px; top: 1em; left: 50%; margin-left: -150px; font-family: 'arcade', sans-serif; font-size: 1.5em; letter-spacing: 0.1em; color: white; text-align: center; }
-#current_lap_time 	   { display: block; z-index: 2; position: absolute; top: 1em; left: 580px; font-family: 'arcade', sans-serif; font-size: 1.5em; letter-spacing: 0.1em; color: white; text-align: left; }
+#hud                   { display: none; position: absolute; z-index: 1; width: 640px; padding: 5px 0; font-family: monospace; font-size: 1em; background-color: rgba(255,0,0,0.4); color: black; border-bottom: 2px solid black; box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
+#hud .hud              { background-color: rgba(255,255,255,0.6); padding: 5px; border: 1px solid black; margin: 0 5px; transition-property: background-color; transition-duration: 2s; transition-property: background-color; transition-duration: 2s; }
+#speed            	   { display: block; z-index: 2; position: absolute; width: 300px; top: 0.4em; left: 50%; margin-left: -150px; font-family: 'arcade', sans-serif; font-size: 2.5em; letter-spacing: 0.1em; color: white; text-align: center; }
+#current_lap_time 	   { display: block; z-index: 2; position: absolute; top: 0.4em; left: 550px; font-family: 'arcade', sans-serif; font-size: 2.5em; letter-spacing: 0.1em; color: white; text-align: left; }
 #hud #last_lap_time    { float: left; display: none;  }
-#hud #fast_lap_time    { display: block; width: 12em;  margin: 0 auto; text-align: center; transition-property: background-color; transition-duration: 2s; -webkit-transition-property: background-color; -webkit-transition-duration: 2s; }
+#hud #fast_lap_time    { display: block; width: 12em;  margin: 0 auto; text-align: center; transition-property: background-color; transition-duration: 2s; transition-property: background-color; transition-duration: 2s; }
 #hud .value            { color: black; font-weight: bold; }
 #hud .fastest          { background-color: rgba(255,215,0,0.5); }
 
 .hidden {
 	display: none;
+	opacity: 0;
 }
 
-@-webkit-keyframes wolfright {
+@keyframes titleSlideIn {
+	0%   { transform: translateY(-600px); }
+   	100% { transform: translateY(0px);    }
+}
+
+#start {
+	display: block;
+	position: absolute;
+	left: 50%; 
+	margin-left: -380px;
+	z-index: 0; 
+	width: 760px; 
+	height: 600px; 
+	z-index: -1; 
+	cursor: pointer;
+}
+
+.titleSlideInAnim {
+	animation: titleSlideIn forwards 0.6s ease-in;
+}
+
+@keyframes wolfright {
    	100% { background-position: -2400px 640px; }
 }
 
-@-webkit-keyframes wolfleft {
+@keyframes wolfleft {
    	100% { background-position: -0 320px; }
 }
 
-@-webkit-keyframes wolf {
+@keyframes wolf {
    	100% { background-position: -2400px 0; }
 }
 
 #wolf {
-	transform: translateY(300px);
-	transition: transform 2s ease-in;
+/*	transform: translateY(300px);
+	transition: transform 2s ease-in;*/
 }
 
 .wolf-animation {
 	z-index: 1;
 	position: absolute;
-	bottom: -50px;
+	bottom: -100px;
 	left: 50%;
 	margin-left: -100px;
 	width: 200px;
@@ -73,19 +95,19 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 .straight {
 	background: url('images/wolflarge.png');
 	background-position: 0 0;
-	-webkit-animation: wolf 0.35s steps(12) infinite; 
+	animation: wolf 0.35s steps(12) infinite; 
 }
 
 .right {
 	background: url('images/wolflarge.png');
 	background-position: 0 640px;
-	-webkit-animation: wolfright 0.35s steps(12) infinite; 
+	animation: wolfright 0.35s steps(12) infinite; 
 }
 
 .left {
 	background: url('images/wolflarge.png');
 	background-position: -2400px 320px;
-	-webkit-animation: wolfleft 0.35s steps(12) infinite; 
+	animation: wolfleft 0.35s steps(12) infinite; 
 }
 
 .feather-animation {
@@ -105,21 +127,21 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 .feather-pop {
 	background: url('images/feathers.png');
 	background-position: 0 0;
-	-webkit-animation: feathers .6s steps(9); 
+	animation: feathers .6s steps(10); 
 }
 
 .feather-pop2 {
 	background: url('images/feathers.png');
 	background-position: 0 0;
-	-webkit-animation: feathers2 .6s steps(9); 
+	animation: feathers2 .6s steps(10); 
 }
 
-@-webkit-keyframes feathers {
-   	100% { background-position: -5760px 0; }
+@keyframes feathers {
+   	100% { background-position: -6400px 0; }
 }
 
-@-webkit-keyframes feathers2 {
-   	100% { background-position: -5760px 0; }
+@keyframes feathers2 {
+   	100% { background-position: -6400px 0; }
 }
 
 .wood-animation {
@@ -139,20 +161,20 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 .wood-pop {
 	background: url('images/wood.png');
 	background-position: 0 0;
-	-webkit-animation: wood 0.5s steps(7); 
+	animation: wood 0.5s steps(7); 
 }
 
 .wood-pop2 {
 	background: url('images/wood.png');
 	background-position: 0 0;
-	-webkit-animation: wood2 0.5s steps(7); 
+	animation: wood2 0.5s steps(7); 
 }
 
-@-webkit-keyframes wood {
+@keyframes wood {
    	100% { background-position: -4480px 0; }
 }
 
-@-webkit-keyframes wood2 {
+@keyframes wood2 {
    	100% { background-position: -4480px 0; }
 }
 
@@ -186,19 +208,19 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #fff; mar
 .heart-pop {
 	background: url('images/getheart.png');
 	background-position: 0 0;
-	-webkit-animation: heart 0.5s 0.35s steps(7); 
+	animation: heart 0.5s 0.35s steps(7); 
 }
 
 .heart-pop2 {
 	background: url('images/getheart.png');
 	background-position: 0 0;
-	-webkit-animation: heart2 0.5s 0.35s steps(7); 
+	animation: heart2 0.5s 0.35s steps(7); 
 }
 
-@-webkit-keyframes heart {
+@keyframes heart {
    	100% { background-position: -4480px 0; }
 }
 
-@-webkit-keyframes heart2 {
+@keyframes heart2 {
    	100% { background-position: -4480px 0; }
 }

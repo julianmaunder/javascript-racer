@@ -1,10 +1,10 @@
 var myLoader = html5Preloader();
 
 myLoader.addFiles(
-  "audio/poof.wav",
-  "audio/wood.wav", 
+  "audio/poof.ogg",
+  "audio/wood.ogg", 
   "audio/game.mp3", 
-  "audio/getheart.wav", 
+  "audio/getheart.ogg", 
   "images/background.png",
   "images/sprites.png",
   "images/wolflarge.png",
@@ -14,18 +14,18 @@ myLoader.addFiles(
   );
 
 myLoader.on('finish', function(){
-  alert('All assets loaded.'); 
+  $('#start').removeClass("hidden");
 });
 
-var poofSound = new Audio("audio/poof.wav");
-var woodSound = new Audio("audio/wood.wav");
+var poofSound = new Audio("audio/poof.ogg");
+var woodSound = new Audio("audio/wood.ogg");
 var gameSound = new Audio("audio/game.mp3");
-var heartSound = new Audio("audio/getheart.wav");
+var heartSound = new Audio("audio/getheart.ogg");
 gameSound.loop = true;
 
 $('#start').click(function(){
   start();
-  this.remove();
+  $('#start').addClass("hidden");
   $('#racer').removeClass("hidden");
 });
 
@@ -103,10 +103,10 @@ var Util = {
 
   overlap: function(x1, w1, x2, w2, percent) {
     var half = (percent || 1)/2;
-    var min1 = x1 - (w1*half);
-    var max1 = x1 + (w1*half);
-    var min2 = x2 - (w2*half);
-    var max2 = x2 + (w2*half);
+    var min1 = (x1*2) - w1;
+    var max1 = (x1*2) + w1;
+    var min2 = (x2*2) - w2;
+    var max2 = (x2*2) + w2;
     return ! ((max1 < min2) || (min1 > max2));
   }
 
@@ -163,7 +163,7 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
         requestAnimationFrame(frame, canvas);
       }
       frame(); // lets get this party started
-      $("#wolf").removeClass("hidden").css("transform", "translateY(0)");
+      $("#wolf").removeClass("hidden");
     });
   },
 
@@ -408,7 +408,7 @@ var SPRITES = {
   TREE2:                  { x:  560, y:    0, w:  740, h: 1730 },
   TREE3:                  { x: 1300, y:    0, w:  300, h: 1730 },
   LOG:                    { x:    0, y: 1760, w:  880, h:  160 },
-  STUMP1:                 { x:  880, y: 1760, w:   75, h:   90 },
+  STUMP1:                 { x:  880, y: 1760, w:  135, h:  150 },
   CAR03:                  { x:  500, y:  105, w:   55, h:   35 },
   CAR02:                  { x:  500, y:   60, w:   55, h:   45 },
   CAR04:                  { x:  500, y:    0, w:   55, h:   55 },
@@ -454,7 +454,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var trackLength    = null;                    // z length of entire track (computed)
     var lanes          = 3;                       // number of lanes
     var fieldOfView    = 80;                     // angle (degrees) for field of view
-    var cameraHeight   = 400;                    // z height of camera
+    var cameraHeight   = 500;                    // z height of camera
     var cameraDepth    = null;                    // z distance camera is from screen (computed)
     var drawDistance   = 900;                     // number of segments to draw
     var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
@@ -463,13 +463,13 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
     var speed          = 0;                       // current speed
     var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
-    var accel          =  maxSpeed/4;             // acceleration rate - tuned until it 'felt' right
+    var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
     var breaking       = -maxSpeed;               // deceleration rate when braking
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-    var totalCars      = 300;                     // total number of cars on the road
-    var totalStumps    = 100;
+    var totalCars      = 400;                     // total number of cars on the road
+    var totalStumps    = 50;
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
     var score          = 0;
@@ -529,7 +529,13 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-        speed = Util.accelerate(speed, accel, dt);        
+      speed = Util.accelerate(speed, accel, dt);       
+
+      // if (speed < maxSpeed) {
+      //   $('#wolf').css("animation-duration", "0.8s");
+      // } else {
+      //   $('#wolf').css("animation-duration", "0.35s");
+      // }
 
       if ((playerX < -1) || (playerX > 1)) {
         if (speed > offRoadLimit)
@@ -550,10 +556,18 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         car  = playerSegment.cars[n];
         carW = car.sprite.w * SPRITES.SCALE;
         if (speed > car.speed) {
-          if (Util.overlap(playerX, playerW, car.offset, carW * 2, 1)) {
-            // speed    = car.speed * (car.speed/speed);
+          if (Util.overlap(playerX, playerW, car.offset, (carW*2), 1)) {
             // position = Util.increase(car.z, -playerZ, trackLength)
             playerSegment.cars.splice();
+            var currentSpeed = speed;
+            speed    = 0;
+            setTimeout(function(){ 
+              speed = currentSpeed + maxSpeed/20; 
+              position += currentSpeed/4;
+              console.log(currentSpeed);
+              $('#wolf').removeClass("hidden");
+            }, 200);
+            $('#wolf').addClass("hidden");
             birds += 1;
             birdHealth += 1;
             if (birdHealth === 100) {
@@ -588,8 +602,10 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         stump  = playerSegment.stumps[n];
         stumpW = stump.sprite.w * SPRITES.SCALE;
         if (speed > stump.speed) {
-          if (Util.overlap(playerX, playerW, stump.offset, stumpW, 1)) {
-            speed    = speed * 0.66;
+          if (Util.overlap(playerX, playerW, stump.offset, stumpW * 0.5, 1)) {
+            var currentSpeed = speed;
+            speed    = maxSpeed/3;
+            setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
             // position = Util.increase(car.z, -playerZ, trackLength)
             console.log(stump.z);
             playerSegment.stumps.splice();
@@ -879,7 +895,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, car.percent);
           spriteX     = Util.interpolate(segment.p1.screen.x,     segment.p2.screen.x,     car.percent) + (spriteScale * car.offset * roadWidth * width/2);
           spriteY     = Util.interpolate(segment.p1.screen.y,     segment.p2.screen.y,     car.percent);
-          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, spriteScale, spriteX, spriteY, -0.5, -1, segment.clip);
+          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, (spriteScale), spriteX, spriteY, -0.5, -1, segment.clip);
         }
 
         for(i = 0 ; i < segment.stumps.length ; i++) {
@@ -888,7 +904,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, stump.percent);
           spriteX     = Util.interpolate(segment.p1.screen.x,     segment.p2.screen.x,     stump.percent) + (spriteScale * stump.offset * roadWidth * width/2);
           spriteY     = Util.interpolate(segment.p1.screen.y,     segment.p2.screen.y,     stump.percent);
-          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, stump.sprite, spriteScale, spriteX, spriteY, -0.5, -1, segment.clip);
+          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, stump.sprite, (spriteScale/1.5), spriteX, spriteY, -0.5, -1, segment.clip);
         }
 
         for(i = 0 ; i < segment.sprites.length ; i++) {
@@ -1102,13 +1118,15 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       }
       for (var n = 50 ; n < totalCars ; n++) {
         offset = Math.random() * Util.randomChoice([-1, 1]);
-        z      = Math.floor(Math.random() * segments.length) * segmentLength;
+        z      = (Math.floor(Math.random() * segments.length) * segmentLength) + 20000;
         sprite = Util.randomChoice(SPRITES.CARS);
         speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
         car = { offset: offset, z: z, sprite: sprite, speed: speed };
         segment = findSegment(car.z);
+        if (z < segments.length * segmentLength) {
         segment.cars.push(car);
         cars.push(car);
+      }
       }
     }
 
@@ -1118,7 +1136,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       if (totalStumps < 50) {
         totalStumps = totalStumps * 0.5;
       }
-      for (var n = 0 ; n < totalStumps ; n++) {
+      for ( var n = 0 ; n < totalStumps ; n++) {
         offset = Math.random() * Util.randomChoice([-1, 1]);
         z      = (Math.floor(Math.random() * segments.length) * segmentLength) + 50000;
         sprite = Util.randomChoice(SPRITES.STUMPS);

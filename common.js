@@ -17,6 +17,8 @@ myLoader.on('finish', function(){
   $('#start').removeClass("hidden");
 });
 
+var title = true;
+
 var poofSound = new Audio("audio/poof.ogg");
 var woodSound = new Audio("audio/wood.ogg");
 var gameSound = new Audio("audio/game.mp3");
@@ -24,13 +26,25 @@ var heartSound = new Audio("audio/getheart.ogg");
 gameSound.loop = true;
 
 $('#start').click(function(){
-  start();
-  $('#start').addClass("hidden");
-  $('#racer').removeClass("hidden");
+    title = false;
+    start();
+    $('#start').addClass("hidden");
+    $('#racer').removeClass("hidden");
 });
 
-function start() {
+document.onkeydown=function(e){
+  if (title) {
+    start();
+    title = false;
+    $('#start').addClass("hidden");
+    $('#racer').removeClass("hidden");
+  }
+}
 
+
+
+function start() {
+console.log('started');
 //=========================================================================
 // minimalist DOM helpers
 //=========================================================================
@@ -477,7 +491,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var maxHearts      = 6;
     var hearts         = 6;
     var birdHealth     = 99;
-    var combo          = true;
+    var isCombo        = false;
+    var currentCombo   = 1;    
 
     var keyLeft        = false;
     var keyRight       = false;
@@ -554,20 +569,36 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       for(n = 0 ; n < playerSegment.cars.length ; n++) {
         car  = playerSegment.cars[n];
-        carW = car.sprite.w * SPRITES.SCALE;
+        carW = (car.sprite.w * SPRITES.SCALE) * 2;
         if (speed > car.speed) {
-          if (Util.overlap(playerX, playerW, car.offset, (carW*2), 1)) {
+          if (Util.overlap(playerX, playerW, car.offset, (carW), 1)) {
             // position = Util.increase(car.z, -playerZ, trackLength)
             playerSegment.cars.splice();
+            currentCombo += 1;
+            console.log(currentCombo);
             var currentSpeed = speed;
             speed    = 0;
+            if (currentCombo >= 11) {
+              carW = (car.sprite.w * SPRITES.SCALE) * 10;
+              isCombo = true;
+              $('#wolf').addClass("hidden");
+              console.log("combo");
+            }  else { 
+              isCombo = false;
+            }
             setTimeout(function(){ 
-              speed = currentSpeed + maxSpeed/20; 
-              position += currentSpeed/4;
-              console.log(currentSpeed);
-              $('#wolf').removeClass("hidden");
-            }, 200);
-            $('#wolf').addClass("hidden");
+              speed = currentSpeed + maxSpeed/20;
+              if (isCombo) {
+                position += 5000;
+                if (keyLeft) {
+                  playerX = playerX - 0.4;
+                }
+                else if (keyRight) {
+                  playerX = playerX + 0.4;
+                }
+              }
+              setTimeout( function(){$('#wolf').removeClass("hidden");}, 200);
+            }, 250);
             birds += 1;
             birdHealth += 1;
             if (birdHealth === 100) {
@@ -594,6 +625,10 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
                   $('.feather-animation').addClass('feather-pop2').removeClass("feather-pop");
                }
             break;
+          } else {
+            isCombo = false;
+            currentCombo = 1;
+            console.log("miss");
           }
         }
       }
@@ -631,35 +666,35 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
       treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
 
-      if (position > playerZ) {
-        if (currentLapTime && (startPosition < playerZ)) {
-          lastLapTime    = currentLapTime;
-          currentLapTime = 0;
-          if (lastLapTime <= Util.toFloat(Dom.storage.fast_lap_time)) {
-            Dom.storage.fast_lap_time = lastLapTime;
-            updateHud('fast_lap_time', formatTime(lastLapTime));
-            Dom.addClassName('fast_lap_time', 'fastest');
-            Dom.addClassName('last_lap_time', 'fastest');
-            cars.length = 0;
-            stumps.length = 0;
-            resetCars();
-            resetStumps();
-          }
-          else {
-            Dom.removeClassName('fast_lap_time', 'fastest');
-            Dom.removeClassName('last_lap_time', 'fastest');
-            cars.length = 0;
-            stumps.length = 0;
-            resetCars();
-            resetStumps();
-          }
-          updateHud('last_lap_time', formatTime(lastLapTime));
-          Dom.show('last_lap_time');
-        }
-        else {
-          currentLapTime += dt;
-        }
-      }
+      // if (position > playerZ) {
+      //   if (currentLapTime && (startPosition < playerZ)) {
+      //     lastLapTime    = currentLapTime;
+      //     currentLapTime = 0;
+      //   //   if (lastLapTime <= Util.toFloat(Dom.storage.fast_lap_time)) {
+      //   //     Dom.storage.fast_lap_time = lastLapTime;
+      //   //     updateHud('fast_lap_time', formatTime(lastLapTime));
+      //   //     Dom.addClassName('fast_lap_time', 'fastest');
+      //   //     Dom.addClassName('last_lap_time', 'fastest');
+      //   //     // cars.length = 0;
+      //   //     // stumps.length = 0;
+      //   //     // resetCars();
+      //   //     // resetStumps();
+      //   //   }
+      //   //   else {
+      //   //     Dom.removeClassName('fast_lap_time', 'fastest');
+      //   //     Dom.removeClassName('last_lap_time', 'fastest');
+      //   //     cars.length = 0;
+      //   //     stumps.length = 0;
+      //   //     // resetCars();
+      //   //     // resetStumps();
+      //   //   }
+      //   //   updateHud('last_lap_time', formatTime(lastLapTime));
+      //   //   Dom.show('last_lap_time');
+      //   // }
+      //   else {
+      //     currentLapTime += dt;
+      //   }
+      // }
 
       updateHud('speed',            score);
       updateHud('current_lap_time', birds);
@@ -1113,22 +1148,90 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function resetCars() {
       cars = [];
       var n, car, segment, offset, z, sprite, speed;
-      if (totalCars > 50) {
-        totalCars = totalCars * 0.5;
-      }
-      for (var n = 50 ; n < totalCars ; n++) {
-        offset = Math.random() * Util.randomChoice([-1, 1]);
-        z      = (Math.floor(Math.random() * segments.length) * segmentLength) + 20000;
-        sprite = Util.randomChoice(SPRITES.CARS);
-        speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
-        car = { offset: offset, z: z, sprite: sprite, speed: speed };
-        segment = findSegment(car.z);
-        if (z < segments.length * segmentLength) {
-        segment.cars.push(car);
-        cars.push(car);
-      }
-      }
+      var lastCar = 20000;
+      var lastCarX = 0;
+      intro(lastCar);
     }
+
+    function BirdMiddle(lastCar) {
+      offset = 0;
+      z      = lastCar;
+      sprite = Util.randomChoice(SPRITES.CARS);
+      speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+      car = { offset: offset, z: z, sprite: sprite, speed: speed };
+      segment = findSegment(car.z);
+      segment.cars.push(car);
+      cars.push(car);
+    }
+
+    function BirdLeft(lastCar) {
+      offset = -1;
+      z      = lastCar;
+      sprite = Util.randomChoice(SPRITES.CARS);
+      speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+      car = { offset: offset, z: z, sprite: sprite, speed: speed };
+      segment = findSegment(car.z);
+      segment.cars.push(car);
+      cars.push(car);
+    }
+
+    function BirdRight(lastCar) {
+      offset = 1;
+      z      = lastCar;
+      sprite = Util.randomChoice(SPRITES.CARS);
+      speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+      car = { offset: offset, z: z, sprite: sprite, speed: speed };
+      segment = findSegment(car.z);
+      segment.cars.push(car);
+      cars.push(car);
+    }
+
+    function intro(lastCar) {
+      BirdMiddle(lastCar);
+      lastCar += 6000;
+      BirdLeft(lastCar);
+      lastCar += 6000;
+      BirdMiddle(lastCar);
+      lastCar += 6000;
+      BirdRight(lastCar);
+      lastCar += 6000;
+      BirdRight(lastCar);
+      lastCar += 18000;
+      BirdMiddle(lastCar);
+      lastCar += 6000;
+      BirdLeft(lastCar);
+      lastCar += 6000;
+      BirdMiddle(lastCar);
+      lastCar += 6000;
+      BirdRight(lastCar);
+      lastCar += 6000;
+      BirdRight(lastCar);
+    }
+
+
+    // function resetCars() {
+    //   cars = [];
+    //   var n, car, segment, offset, z, sprite, speed;
+    //   var lastCar = 10000;
+    //   var lastCarX = 0;
+    //   if (totalCars > 50) {
+    //     totalCars = totalCars * 0.5;
+    //   }
+    //   for (var n = 50 ; n < totalCars ; n++) {
+    //     lastCar += 6000;
+    //     offset = Math.random() * Util.randomChoice([-1, 1]) + 0.6;
+    //     lastCarX = offset;
+    //     z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
+    //     sprite = Util.randomChoice(SPRITES.CARS);
+    //     speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+    //     car = { offset: offset, z: z, sprite: sprite, speed: speed };
+    //     segment = findSegment(car.z);
+    //     if (z < segments.length * segmentLength) {
+    //     segment.cars.push(car);
+    //     cars.push(car);
+    //   }
+    //   }
+    // }
 
     function resetStumps() {
       stumps = [];

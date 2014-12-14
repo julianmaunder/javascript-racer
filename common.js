@@ -16,6 +16,7 @@ myLoader.addFiles(
 
 myLoader.on('finish', function(){
   $('#start').removeClass("hidden");
+  menuLoop.play();
 });
 
 var title = true;
@@ -23,23 +24,32 @@ var title = true;
 var poofSound = new Audio("audio/poof.ogg");
 var woodSound = new Audio("audio/wood.ogg");
 var gameSound = new Audio("audio/game.mp3");
-var heartSound = new Audio("audio/getheart.ogg");
 gameSound.loop = true;
+var heartSound = new Audio("audio/getheart.ogg");
+var menuLoop = new Audio("audio/menuloop.ogg");
+menuLoop.loop = true;
+var gameMellow = new Audio("audio/gamemellow.ogg");
+gameMellow.loop = true;
+var gameExciting = new Audio("audio/gameexciting.ogg")
+gameExciting.loop = true;
+
 
 $('#start').click(function(){
     title = false;
     start();
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
+    menuLoop.pause();
     poofSound.play();
 });
 
-document.onkeydown=function(e){
+document.onkeypress=function(e){
   if (title) {
     start();
     title = false;
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
+    menuLoop.pause();
     poofSound.play();
   }
 }
@@ -353,8 +363,7 @@ var Render = {
     if (clipH < destH)
       if (isCombo === false) {
         ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
-      } else if (isCombo === true && currentCombo >= 3) {
-        var img = new Image();   // Create new img element
+      } else if (currentCombo >= rushBirds - 2 && isCombo === true) {
         img.src = 'images/combosprites.png'; // Set source path
         ctx.drawImage(img, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
       }  
@@ -513,6 +522,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var birdHealth     = 99;
     var isCombo        = false;
     var currentCombo   = 1;    
+    var rushBirds      = 5;
+
+    var img = new Image();   // Create new img element
 
     var keyLeft        = false;
     var keyRight       = false;
@@ -543,31 +555,58 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       score += 1;
 
+      if (isCombo) {
+        score += currentCombo -1;
+        gameMellow.pause();
+        gameExciting.play();
+      } else {
+        gameMellow.play();
+        gameExciting.pause();
+      }
+
       updateCars(dt, playerSegment, playerW);
       updateStumps(dt, playerSegment, playerW);
 
       position = Util.increase(position, dt * speed, trackLength);
 
-      if (keyLeft) {
-        playerX = playerX - dx;
-        $('#wolf').addClass("left").removeClass("straight right");
-      }
+      if (currentCombo >= rushBirds - 2) {
+        if (keyLeft) {
+          playerX = playerX - dx;
+          $('#wolf').addClass("leftc").removeClass("straightc rightc");
+        }
+          
+        else if (keyRight) {
+          playerX = playerX + dx;
+          $('#wolf').addClass("rightc").removeClass("straightc leftc");
+        }
+
+        else if (keyLeft === false && keyRight === false) {
+          $('#wolf').addClass('straightc').removeClass("rightc leftc");
+        }
+
+      } else if (isCombo === false) {
+        $('#wolf').removeClass("straightc rightc leftc");
         
-      else if (keyRight) {
-        playerX = playerX + dx;
-        $('#wolf').addClass("right").removeClass("straight left");
-      }
+        if (keyLeft) {
+          playerX = playerX - dx;
+          $('#wolf').addClass("left").removeClass("straight right");
+        }
+          
+        else if (keyRight) {
+          playerX = playerX + dx;
+          $('#wolf').addClass("right").removeClass("straight left");
+        }
 
-      else if (keyLeft === false && keyRight === false) {
-        $('#wolf').addClass('straight').removeClass("right left");
+        else if (keyLeft === false && keyRight === false) {
+          $('#wolf').addClass('straight').removeClass("right left");
+        }
       }
-
       playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
       speed = Util.accelerate(speed, accel, dt);       
 
       if (isCombo === true) {
-        $("#wolf").css("opacity", "0.5");
+        $("#wolf").css("opacity", "0.2");
       } else {
         $("#wolf").css("opacity", "1");
       }
@@ -605,7 +644,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             var currentSpeed = speed;
             speed    = 0;
 
-            if (currentCombo >= 3) {
+            if (currentCombo >= rushBirds - 2) {
               carW = (car.sprite.w * SPRITES.SCALE) * 50;
               isCombo = true;
               $('#wolf').addClass("hidden");
@@ -615,7 +654,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
             setTimeout(function(){ 
               speed = currentSpeed + maxSpeed/20;
-              if (isCombo) {
+              if (currentCombo >= rushBirds - 1) {
                 position += 5250;
                 if (keyLeft) {
                   playerX = playerX - 0.4;
@@ -624,7 +663,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
                   playerX = playerX + 0.4;
                 }
               }
-              setTimeout( function(){$('#wolf').removeClass("hidden");}, 250);
+              setTimeout( function(){$('#wolf').removeClass("hidden");}, 200);
             }, 250);
 
             birds += 1;
@@ -667,6 +706,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         if (speed > stump.speed) {
           if (Util.overlap(playerX, playerW, stump.offset, stumpW * 0.5, 1)) {
             isCombo = false;
+            currentCombo = 1;
             var currentSpeed = speed;
             speed    = maxSpeed/3;
             setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
@@ -939,9 +979,11 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       } 
 
       function renderRoad() {
-        if (isCombo === true && currentCombo >= 3) {
+        if (isCombo === true && currentCombo >= rushBirds - 2) {
+          fogDensity = 0;
           segment.color = Math.floor(n/rumbleLength)%2 ? COMBOCOLORS.DARK : COMBOCOLORS.LIGHT;
         } else {
+          fogDensity = 20;
           segment.color = Math.floor(n/rumbleLength)%2 ? COLORS.DARK : COLORS.LIGHT;
         }
                 Render.segment(ctx, width, lanes,
@@ -1099,7 +1141,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function resetRoad() {
       segments = [];
-      addStraight(1000)
+      addStraight(100)
+      addBumps();
+      addLowRollingHills();
       addHill(ROAD.LENGTH.SHORT, -ROAD.HILL.HARD);
       addLowRollingHills();
       addSCurves();
@@ -1121,11 +1165,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       resetCars();
       resetStumps();
       gameSound.play();
-
-      segments[findSegment(playerZ).index + 2].color = COLORS.START;
-      segments[findSegment(playerZ).index + 3].color = COLORS.START;
-      for(var n = 0 ; n < rumbleLength ; n++)
-        segments[segments.length-1-n].color = COLORS.FINISH;
 
       trackLength = segments.length * segmentLength;
     }
@@ -1252,7 +1291,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         totalCars = totalCars * 0.5;
       }
       for (var n = 50 ; n < totalCars ; n++) {
-        lastCar += 6000;
+        lastCar += 16000;
         offset = 0;
         lastCarX = offset;
         z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
@@ -1330,6 +1369,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       if ((segments.length==0) || (options.segmentLength) || (options.rumbleLength))
         resetRoad(); // only rebuild road when necessary
+        gameMellow.play();
     }
 
     //=========================================================================

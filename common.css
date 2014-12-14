@@ -110,6 +110,24 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 	animation: wolfleft 0.35s steps(12) infinite; 
 }
 
+.straightc {
+	background: url('images/wolflargewhite.png');
+	background-position: 0 0;
+	animation: wolf 0.25s steps(12) infinite; 
+}
+
+.rightc {
+	background: url('images/wolflargewhite.png');
+	background-position: 0 640px;
+	animation: wolfright 0.25s steps(12) infinite; 
+}
+
+.leftc {
+	background: url('images/wolflargewhite.png');
+	background-position: -2400px 320px;
+	animation: wolfleft 0.25s steps(12) infinite; 
+}
+
 .feather-animation {
 	position: absolute;
 	top: 0;
@@ -223,4 +241,27 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 
 @keyframes heart2 {
    	100% { background-position: -4480px 0; }
+}
+
+.lightning-animation {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 9;
+	width: 640px;
+	height: 480px;
+	background: #ffffff;
+	opacity: 0;
+}
+
+.lightningAnim {
+	animation: lightning 0.6s steps(9);
+}
+
+@keyframes lightning {
+	0%    { opacity: 1;}
+	10%      { opacity: 1;}
+	100% { opacity: 0;}
 }

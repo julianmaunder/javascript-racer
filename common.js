@@ -10,7 +10,8 @@ myLoader.addFiles(
   "images/wolflarge.png",
   "images/feathers.png",
   "images/hearts.png",
-  "images/wood.png"
+  "images/wood.png",
+  'images/combosprites.png'
   );
 
 myLoader.on('finish', function(){
@@ -30,6 +31,7 @@ $('#start').click(function(){
     start();
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
+    poofSound.play();
 });
 
 document.onkeydown=function(e){
@@ -38,6 +40,7 @@ document.onkeydown=function(e){
     title = false;
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
+    poofSound.play();
   }
 }
 
@@ -348,8 +351,13 @@ var Render = {
 
     var clipH = clipY ? Math.max(0, destY+destH-clipY) : 0;
     if (clipH < destH)
-      ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
-
+      if (isCombo === false) {
+        ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
+      } else if (isCombo === true && currentCombo >= 3) {
+        var img = new Image();   // Create new img element
+        img.src = 'images/combosprites.png'; // Set source path
+        ctx.drawImage(img, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
+      }  
   },
 
   //---------------------------------------------------------------------------
@@ -409,6 +417,18 @@ var COLORS = {
   FINISH: { road: '#efefef',   grass: '#e9e9e9',   rumble: '#e9e9e9'               }
 };
 
+
+var COMBOCOLORS = {
+    SKY:  '#000000',
+    TREE: '#000000',
+    FOG:  '#000000',
+    LIGHT:  { road: '#1d2838',   grass: '#101a24',   rumble: '#101a24', lane: '#1d2838'  },
+    DARK:   { road: '#1d2838',   grass: '#101a24',   rumble: '#101a24'                   },
+    START:  { road: '#1d2838',   grass: '#101a24',   rumble: '#101a24'               },
+    FINISH: { road: '#1d2838',   grass: '#101a24',   rumble: '#101a24'               }
+  };
+
+
 var BACKGROUND = {
   HILLS: { x:   5, y:   5, w: 1280, h: 480 },
   SKY:   { x:   5, y: 495, w: 1280, h: 480 },
@@ -449,7 +469,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var offRoadDecel   = 0.99;                    // speed multiplier when off road (e.g. you lose 2% speed each update frame)
     var skySpeed       = 0.001;                   // background sky layer scroll speed when going around curve (or up hill)
     var hillSpeed      = 0.002;                   // background hill layer scroll speed when going around curve (or up hill)
-    var treeSpeed      = 0.003;                   // background tree layer scroll speed when going around curve (or up hill)
+    var treeSpeed      = 0.002;                   // background tree layer scroll speed when going around curve (or up hill)
     var skyOffset      = 0;                       // current sky scroll offset
     var hillOffset     = 0;                       // current hill scroll offset
     var treeOffset     = 0;                       // current tree scroll offset
@@ -473,7 +493,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var drawDistance   = 900;                     // number of segments to draw
     var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
     var playerZ        = null;                    // player relative z distance from camera (computed)
-    var fogDensity     = 20;                       // exponential fog density
+    var fogDensity     = 0;                       // exponential fog density
     var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
     var speed          = 0;                       // current speed
     var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
@@ -546,6 +566,12 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       speed = Util.accelerate(speed, accel, dt);       
 
+      if (isCombo === true) {
+        $("#wolf").css("opacity", "0.5");
+      } else {
+        $("#wolf").css("opacity", "1");
+      }
+
       // if (speed < maxSpeed) {
       //   $('#wolf').css("animation-duration", "0.8s");
       // } else {
@@ -578,18 +604,19 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             console.log(currentCombo);
             var currentSpeed = speed;
             speed    = 0;
-            if (currentCombo >= 11) {
-              carW = (car.sprite.w * SPRITES.SCALE) * 10;
+
+            if (currentCombo >= 3) {
+              carW = (car.sprite.w * SPRITES.SCALE) * 50;
               isCombo = true;
               $('#wolf').addClass("hidden");
-              console.log("combo");
             }  else { 
               isCombo = false;
             }
+
             setTimeout(function(){ 
               speed = currentSpeed + maxSpeed/20;
               if (isCombo) {
-                position += 5000;
+                position += 5250;
                 if (keyLeft) {
                   playerX = playerX - 0.4;
                 }
@@ -597,8 +624,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
                   playerX = playerX + 0.4;
                 }
               }
-              setTimeout( function(){$('#wolf').removeClass("hidden");}, 200);
+              setTimeout( function(){$('#wolf').removeClass("hidden");}, 250);
             }, 250);
+
             birds += 1;
             birdHealth += 1;
             if (birdHealth === 100) {
@@ -638,11 +666,11 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         stumpW = stump.sprite.w * SPRITES.SCALE;
         if (speed > stump.speed) {
           if (Util.overlap(playerX, playerW, stump.offset, stumpW * 0.5, 1)) {
+            isCombo = false;
             var currentSpeed = speed;
             speed    = maxSpeed/3;
             setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
             // position = Util.increase(car.z, -playerZ, trackLength)
-            console.log(stump.z);
             playerSegment.stumps.splice();
             hearts--;
             woodSound.pause();
@@ -732,7 +760,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         newSegment  = findSegment(car.z);
         if (oldSegment != newSegment) {
           combo = false;
-          console.log(combo);
           index = oldSegment.cars.indexOf(car);
           oldSegment.cars.splice(index, 1);
           newSegment.cars.push(car);
@@ -886,8 +913,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       Render.background(ctx, background, width, height, BACKGROUND.SKY,   skyOffset,  resolution * skySpeed  * playerY);
       Render.background(ctx, background, width, height, BACKGROUND.HILLS, hillOffset, resolution * hillSpeed * playerY);
-      Render.background(ctx, background, width, height, BACKGROUND.TREES, treeOffset, resolution * treeSpeed * playerY);
-
+      if (isCombo === true) {
+        Render.background(ctx, background, width, height, BACKGROUND.TREES, treeOffset, resolution * treeSpeed * playerY);
+      }
       var n, i, segment, car, stump, sprite, spriteScale, spriteX, spriteY;
 
       for(n = 0 ; n < drawDistance ; n++) {
@@ -907,8 +935,16 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             (segment.p2.screen.y >= segment.p1.screen.y) || // back face cull
             (segment.p2.screen.y >= maxy))                  // clip by (already rendered) hill
           continue;
+        renderRoad();
+      } 
 
-        Render.segment(ctx, width, lanes,
+      function renderRoad() {
+        if (isCombo === true && currentCombo >= 3) {
+          segment.color = Math.floor(n/rumbleLength)%2 ? COMBOCOLORS.DARK : COMBOCOLORS.LIGHT;
+        } else {
+          segment.color = Math.floor(n/rumbleLength)%2 ? COLORS.DARK : COLORS.LIGHT;
+        }
+                Render.segment(ctx, width, lanes,
                        segment.p1.screen.x,
                        segment.p1.screen.y,
                        segment.p1.screen.w,
@@ -917,7 +953,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
                        segment.p2.screen.w,
                        segment.fog,
                        segment.color);
-
+        
         maxy = segment.p1.screen.y;
       }
 
@@ -941,13 +977,14 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           spriteY     = Util.interpolate(segment.p1.screen.y,     segment.p2.screen.y,     stump.percent);
           Render.sprite(ctx, width, height, resolution, roadWidth, sprites, stump.sprite, (spriteScale/1.5), spriteX, spriteY, -0.5, -1, segment.clip);
         }
-
+       
         for(i = 0 ; i < segment.sprites.length ; i++) {
-          sprite      = segment.sprites[i];
-          spriteScale = segment.p1.screen.scale * 10;
-          spriteX     = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width/2);
-          spriteY     = segment.p1.screen.y;
-          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
+            sprite      = segment.sprites[i];
+            spriteScale = segment.p1.screen.scale * 10;
+            spriteX     = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width/2);
+            spriteY     = segment.p1.screen.y;
+
+            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
         }
 
         if (segment == playerSegment) {
@@ -972,7 +1009,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function lastY() { return (segments.length == 0) ? 0 : segments[segments.length-1].p2.world.y; }
 
     function addSegment(curve, y) {
-      var n = segments.length;
+    var n = segments.length;
       segments.push({
           index: n,
              p1: { world: { y: lastY(), z:  n   *segmentLength }, camera: {}, screen: {} },
@@ -1062,7 +1099,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function resetRoad() {
       segments = [];
-
+      addStraight(1000)
       addHill(ROAD.LENGTH.SHORT, -ROAD.HILL.HARD);
       addLowRollingHills();
       addSCurves();
@@ -1149,8 +1186,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       cars = [];
       var n, car, segment, offset, z, sprite, speed;
       var lastCar = 20000;
-      var lastCarX = 0;
-      intro(lastCar);
+      randomCars(lastCar, n, car, segment, offset, z, sprite, speed);
     }
 
     function BirdMiddle(lastCar) {
@@ -1209,29 +1245,27 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     }
 
 
-    // function resetCars() {
-    //   cars = [];
-    //   var n, car, segment, offset, z, sprite, speed;
-    //   var lastCar = 10000;
-    //   var lastCarX = 0;
-    //   if (totalCars > 50) {
-    //     totalCars = totalCars * 0.5;
-    //   }
-    //   for (var n = 50 ; n < totalCars ; n++) {
-    //     lastCar += 6000;
-    //     offset = Math.random() * Util.randomChoice([-1, 1]) + 0.6;
-    //     lastCarX = offset;
-    //     z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
-    //     sprite = Util.randomChoice(SPRITES.CARS);
-    //     speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
-    //     car = { offset: offset, z: z, sprite: sprite, speed: speed };
-    //     segment = findSegment(car.z);
-    //     if (z < segments.length * segmentLength) {
-    //     segment.cars.push(car);
-    //     cars.push(car);
-    //   }
-    //   }
-    // }
+    function randomCars(lastCar, n, car, segment, offset, z, sprite, speed) {
+      cars = [];
+      var n, car, segment, offset, z, sprite, speed;
+      if (totalCars > 50) {
+        totalCars = totalCars * 0.5;
+      }
+      for (var n = 50 ; n < totalCars ; n++) {
+        lastCar += 6000;
+        offset = 0;
+        lastCarX = offset;
+        z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
+        sprite = Util.randomChoice(SPRITES.CARS);
+        speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+        car = { offset: offset, z: z, sprite: sprite, speed: speed };
+        segment = findSegment(car.z);
+        if (z < segments.length * segmentLength) {
+        segment.cars.push(car);
+        cars.push(car);
+      }
+      }
+    }
 
     function resetStumps() {
       stumps = [];
@@ -1274,8 +1308,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         background = images[0];
         sprites    = images[1];
         reset();
-        Dom.storage.fast_lap_time = Dom.storage.fast_lap_time || 180;
-        updateHud('fast_lap_time', formatTime(Util.toFloat(Dom.storage.fast_lap_time)));
       }
     });
 

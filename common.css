@@ -113,7 +113,7 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 .straightc {
 	background: url('images/wolflargewhite.png');
 	background-position: 0 0;
-	animation: wolf 0.25s steps(12) infinite; 
+	animation: wolf 0.2s steps(12) infinite; 
 }
 
 .rightc {
@@ -262,6 +262,6 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 
 @keyframes lightning {
 	0%    { opacity: 1;}
-	10%      { opacity: 1;}
-	100% { opacity: 0;}
+	10%   { opacity: 1;}
+	100%  { opacity: 0;}
 }

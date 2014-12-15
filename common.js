@@ -11,30 +11,17 @@ myLoader.addFiles(
   "images/feathers.png",
   "images/hearts.png",
   "images/wood.png",
-  'images/combosprites.png'
+  'images/combosprites.png',
+  "audio/gamemellow.ogg",
+  "audio/gameexciting.ogg",
+  "audio/thunder.ogg",
+  "audio/menuloop.ogg"
   );
 
 myLoader.on('finish', function(){
   $('#start').removeClass("hidden");
-  menuLoop.play();
-});
-
-var title = true;
-
-var poofSound = new Audio("audio/poof.ogg");
-var woodSound = new Audio("audio/wood.ogg");
-var gameSound = new Audio("audio/game.mp3");
-gameSound.loop = true;
-var heartSound = new Audio("audio/getheart.ogg");
-var menuLoop = new Audio("audio/menuloop.ogg");
-menuLoop.loop = true;
-var gameMellow = new Audio("audio/gamemellow.ogg");
-gameMellow.loop = true;
-var gameExciting = new Audio("audio/gameexciting.ogg")
-gameExciting.loop = true;
-
-
-$('#start').click(function(){
+  // menuLoop.play();
+  $('#start').click(function(){
     title = false;
     start();
     $('#start').addClass("hidden");
@@ -54,6 +41,23 @@ document.onkeypress=function(e){
   }
 }
 
+});
+
+var title = true;
+
+var poofSound = new Audio("audio/poof.ogg");
+var woodSound = new Audio("audio/wood.ogg");
+var gameSound = new Audio("audio/game.mp3");
+gameSound.loop = true;
+var heartSound = new Audio("audio/getheart.ogg");
+var menuLoop = new Audio("audio/menuloop.ogg");
+menuLoop.loop = true;
+var gameMellow = new Audio("audio/gamemellow.ogg");
+gameMellow.loop = true;
+var gameExciting = new Audio("audio/gameexciting.ogg")
+gameExciting.loop = true;
+var thunderSound = new Audio("audio/thunder.ogg");
+var sparkSound = new Audio("audio/spark.ogg");
 
 
 function start() {
@@ -506,7 +510,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
     var speed          = 0;                       // current speed
     var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
-    var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
+    var accel          =  maxSpeed/3;             // acceleration rate - tuned until it 'felt' right
     var breaking       = -maxSpeed;               // deceleration rate when braking
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
@@ -522,7 +526,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var birdHealth     = 99;
     var isCombo        = false;
     var currentCombo   = 1;    
-    var rushBirds      = 5;
+    var rushBirds      = 10;
 
     var img = new Image();   // Create new img element
 
@@ -556,12 +560,21 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       score += 1;
 
       if (isCombo) {
-        score += currentCombo -1;
+        score += currentCombo - 1;
         gameMellow.pause();
+        gameExciting.position = 0;
         gameExciting.play();
+        if (currentCombo === rushBirds - 1) {
+          thunderSound.pause();
+          thunderSound.position = 0;
+          thunderSound.play();
+          centrifugal = 0;
+        }
       } else {
+        gameMellow.position = 0;
         gameMellow.play();
         gameExciting.pause();
+        centrifugal = 0.15;
       }
 
       updateCars(dt, playerSegment, playerW);
@@ -606,16 +619,10 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       speed = Util.accelerate(speed, accel, dt);       
 
       if (isCombo === true) {
-        $("#wolf").css("opacity", "0.2");
+        $("#wolf").css("opacity", "0.4");
       } else {
         $("#wolf").css("opacity", "1");
       }
-
-      // if (speed < maxSpeed) {
-      //   $('#wolf').css("animation-duration", "0.8s");
-      // } else {
-      //   $('#wolf').css("animation-duration", "0.35s");
-      // }
 
       if ((playerX < -1) || (playerX > 1)) {
         if (speed > offRoadLimit)
@@ -636,7 +643,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         car  = playerSegment.cars[n];
         carW = (car.sprite.w * SPRITES.SCALE) * 2;
         if (speed > car.speed) {
-          if (Util.overlap(playerX, playerW, car.offset, (carW), 1)) {
+          if (Util.overlap(playerX, playerW, car.offset, (carW * 3), 1)) {
             // position = Util.increase(car.z, -playerZ, trackLength)
             playerSegment.cars.splice();
             currentCombo += 1;
@@ -645,26 +652,26 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             speed    = 0;
 
             if (currentCombo >= rushBirds - 2) {
-              carW = (car.sprite.w * SPRITES.SCALE) * 50;
               isCombo = true;
               $('#wolf').addClass("hidden");
+              carW = carW * 4;
             }  else { 
               isCombo = false;
             }
 
             setTimeout(function(){ 
               speed = currentSpeed + maxSpeed/20;
-              if (currentCombo >= rushBirds - 1) {
-                position += 5250;
+              if (currentCombo >= rushBirds - 2) {
+                position += 4300;
                 if (keyLeft) {
-                  playerX = playerX - 0.4;
+                  playerX = playerX - 0.25;
                 }
                 else if (keyRight) {
-                  playerX = playerX + 0.4;
+                  playerX = playerX + 0.25;
                 }
               }
               setTimeout( function(){$('#wolf').removeClass("hidden");}, 200);
-            }, 250);
+            }, 200);
 
             birds += 1;
             birdHealth += 1;
@@ -683,9 +690,15 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
                 $('.heart-anim').addClass('heart-pop2').removeClass("heart-pop");
               }
             }
-            poofSound.pause();
-            poofSound.currentTime = 0;
-            poofSound.play();
+            if (isCombo === true) {
+              sparkSound.pause();
+              sparkSound.position = 0;
+              sparkSound.play();
+            } else {
+              poofSound.pause();
+              poofSound.currentTime = 0;
+              poofSound.play();
+            }
               if ($('.feather-animation').hasClass('feather-pop2')) {
                 $('.feather-animation').addClass('feather-pop').removeClass('feather-pop2');
                } else {
@@ -1141,7 +1154,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function resetRoad() {
       segments = [];
-      addStraight(100)
+      addStraight(500);
       addBumps();
       addLowRollingHills();
       addHill(ROAD.LENGTH.SHORT, -ROAD.HILL.HARD);
@@ -1287,22 +1300,40 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function randomCars(lastCar, n, car, segment, offset, z, sprite, speed) {
       cars = [];
       var n, car, segment, offset, z, sprite, speed;
+      var right = false;
       if (totalCars > 50) {
-        totalCars = totalCars * 0.5;
+        totalCars = totalCars;
       }
       for (var n = 50 ; n < totalCars ; n++) {
-        lastCar += 16000;
-        offset = 0;
-        lastCarX = offset;
-        z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
-        sprite = Util.randomChoice(SPRITES.CARS);
-        speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
-        car = { offset: offset, z: z, sprite: sprite, speed: speed };
-        segment = findSegment(car.z);
-        if (z < segments.length * segmentLength) {
-        segment.cars.push(car);
-        cars.push(car);
-      }
+        if (right === true) {
+          lastCar +=6000;
+          offset = 1;
+          lastCarX = offset;
+          z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
+          sprite = Util.randomChoice(SPRITES.CARS);
+          speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+          car = { offset: offset, z: z, sprite: sprite, speed: speed };
+          segment = findSegment(car.z);
+          if (z < segments.length * segmentLength) {
+            segment.cars.push(car);
+            cars.push(car);
+          }
+          right = false;
+        } else {
+          lastCar +=6000;
+          offset = 0;
+          lastCarX = offset;
+          z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
+          sprite = Util.randomChoice(SPRITES.CARS);
+          speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+          car = { offset: offset, z: z, sprite: sprite, speed: speed };
+          segment = findSegment(car.z);
+          if (z < (segments.length * segmentLength) / 4) {
+            segment.cars.push(car);
+            cars.push(car);
+          }
+          right = true;
+        }
       }
     }
 

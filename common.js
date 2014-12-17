@@ -575,16 +575,16 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       }
       
       if (speed < maxSpeed/2) {
-        var accel          =  maxSpeed/2; 
+        accel          =  maxSpeed/2; 
       } else {
-        var accel          =  maxSpeed/20; 
+        accel          =  maxSpeed/20; 
       }
 
       updateCars(dt, playerSegment, playerW);
       updateStumps(dt, playerSegment, playerW);
-
-      position = Util.increase(position, dt * speed, trackLength);
-
+      if (hearts > 0) {
+        position = Util.increase(position, dt * speed, trackLength);
+      }
       if (currentCombo >= rushBirds - 2) {
         if (keyLeft) {
           playerX = playerX - dx;
@@ -779,14 +779,18 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function updateHearts() {
       if (hearts === 0) {
-        gameSound.pause();
+        // $("#wolf").addClass("");
+        speed = speed/10;
         // gameMellow.pause();
         // gameExciting.pause();
-        title = true;
-        $('#start').removeClass("hidden");
-        $('#racer').addClass("hidden");
-        $('.feather-animation').removeClass("feather-pop feather-pop2");
-        $('.woodfeather-animation').removeClass("wood-pop wood-pop2");
+        setTimeout(function(){
+          gameSound.pause();
+          title = true;
+          $('#start').removeClass("hidden");
+          $('#racer').addClass("hidden");
+          $('.feather-animation').removeClass("feather-pop feather-pop2");
+          $('.woodfeather-animation').removeClass("wood-pop wood-pop2");
+        }, 500);
       }
     }
 

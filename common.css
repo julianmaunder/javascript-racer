@@ -107,25 +107,25 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 .left {
 	background: url('images/wolflarge.png');
 	background-position: -2400px 320px;
-	animation: wolfleft 0.3s steps(12) infinite; 
+	animation: wolfleft 0.35s steps(12) infinite; 
 }
 
 .straightc {
 	background: url('images/wolflargewhite.png');
 	background-position: 0 0;
-	animation: wolf 0.2s steps(12) infinite; 
+	animation: wolf 0.35s steps(12) infinite; 
 }
 
 .rightc {
 	background: url('images/wolflargewhite.png');
 	background-position: 0 640px;
-	animation: wolfright 0.25s steps(12) infinite; 
+	animation: wolfright 0.35s steps(12) infinite; 
 }
 
 .leftc {
 	background: url('images/wolflargewhite.png');
 	background-position: -2400px 320px;
-	animation: wolfleft 0.25s steps(12) infinite; 
+	animation: wolfleft 0.35s steps(12) infinite; 
 }
 
 .feather-animation {

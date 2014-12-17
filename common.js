@@ -44,8 +44,6 @@ $('#start').click(function(){
     start();
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
-    menuLoop.pause();
-    poofSound.play();
 });
 
 document.onkeypress=function(e){
@@ -54,8 +52,6 @@ document.onkeypress=function(e){
     start();
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
-    menuLoop.pause();
-    poofSound.play();
   }
 }
 
@@ -367,12 +363,12 @@ var Render = {
 
     var clipH = clipY ? Math.max(0, destY+destH-clipY) : 0;
     if (clipH < destH)
-      if (isCombo === false) {
+      if (moonMode) {
+        // img.src = 'images/combosprites.png'; // Set source path
+        ctx.drawImage(comboSprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
+      } else {
         ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
-      } else if (currentCombo >= rushBirds - 2 && isCombo === true) {
-        img.src = 'images/combosprites.png'; // Set source path
-        ctx.drawImage(img, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
-      }  
+      }
   },
 
   //---------------------------------------------------------------------------
@@ -565,17 +561,14 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       if (isCombo) {
         score += currentCombo -1;
-      } else {
       }
 
       if (currentCombo >= rushBirds - 2) {
         moonMode = true;
-      }  else { 
-        moonMode = false;
       }
       
       if (speed < maxSpeed/2) {
-        accel          =  maxSpeed/2; 
+        accel          =  maxSpeed; 
       } else {
         accel          =  maxSpeed/20; 
       }
@@ -585,7 +578,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       if (hearts > 0) {
         position = Util.increase(position, dt * speed, trackLength);
       }
-      if (currentCombo >= rushBirds - 2) {
+      if (moonMode) {
         if (keyLeft) {
           playerX = playerX - dx;
           $('#wolf').addClass("leftc").removeClass("straightc rightc");
@@ -622,22 +615,25 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       speed = Util.accelerate(speed, accel, dt);       
 
       function updateMoon() {
-        if (currentCombo === 1) {
-          $(".moon").css("background-position", "0 0");
-        } else if (currentCombo === 2) {
-          $(".moon").css("background-position", "-640px 0");
-        } else if (currentCombo === 3) {
-          $(".moon").css("background-position", "-1280px 0");
-        } else if (currentCombo === 4) {
-          $(".moon").css("background-position", "-1920px 0");
-        } else if (currentCombo === 5) {
-          $(".moon").css("background-position", "-2560px 0");
-        } else if (currentCombo === 6) {
-          $(".moon").css("background-position", "-3200px 0");
-        } else if (currentCombo >= 7) {
+        if (moonMode === false) {
+          if (currentCombo === 1) {
+            $(".moon").css("background-position", "0 0");
+          } else if (currentCombo === 2) {
+            $(".moon").css("background-position", "-640px 0");
+          } else if (currentCombo === 3) {
+            $(".moon").css("background-position", "-1280px 0");
+          } else if (currentCombo === 4) {
+            $(".moon").css("background-position", "-1920px 0");
+          } else if (currentCombo === 5) {
+            $(".moon").css("background-position", "-2560px 0");
+          } else if (currentCombo === 6) {
+            $(".moon").css("background-position", "-3200px 0");
+          } else if (currentCombo >= 7) {
+            $(".moon").css("background-position", "-3840px 0");
+          }
+        } else {
           $(".moon").css("background-position", "-3840px 0");
         }
-
       }
 
       // if (isCombo === true) {
@@ -683,7 +679,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
               moonMode = true;
             }  else { 
               isCombo = false;
-              moonMode = false;
             }
             birds += 1;
             poofSound.pause();
@@ -709,6 +704,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         stumpW = stump.sprite.w * SPRITES.SCALE;
         if (speed > stump.speed) {
           if (Util.overlap(playerX, playerW, stump.offset, stumpW * 0.5, 1)) {
+            playerSegment.stumps.splice();
             isCombo = false;
             currentCombo = 1;
             updateMoon();
@@ -719,6 +715,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             playerSegment.stumps.splice();
             if (moonMode === false) {
               hearts = 0;
+            } else {
+              moonMode = false;
             }
             woodSound.pause();
             woodSound.currentTime = 0;
@@ -779,18 +777,16 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function updateHearts() {
       if (hearts === 0) {
+        $('#wolf').removeClass("straight right left");
         // $("#wolf").addClass("");
-        speed = speed/10;
-        // gameMellow.pause();
-        // gameExciting.pause();
         setTimeout(function(){
+          speed = speed/40;
           gameSound.pause();
           title = true;
           $('#start').removeClass("hidden");
           $('#racer').addClass("hidden");
           $('.feather-animation').removeClass("feather-pop feather-pop2");
-          $('.woodfeather-animation').removeClass("wood-pop wood-pop2");
-        }, 500);
+         }, 300);
       }
     }
 
@@ -958,7 +954,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       Render.background(ctx, background, width, height, BACKGROUND.SKY,   skyOffset,  resolution * skySpeed  * playerY);
       Render.background(ctx, background, width, height, BACKGROUND.HILLS, hillOffset, resolution * hillSpeed * playerY);
-      if (isCombo === true) {
+      if (moonMode) {
         Render.background(ctx, background, width, height, BACKGROUND.TREES, treeOffset, resolution * treeSpeed * playerY);
       }
       var n, i, segment, car, stump, sprite, spriteScale, spriteX, spriteY;
@@ -984,7 +980,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       } 
 
       function renderRoad() {
-        if (isCombo === true && currentCombo >= rushBirds - 2) {
+        if (moonMode) {
           fogDensity = 0;
           segment.color = Math.floor(n/rumbleLength)%2 ? COMBOCOLORS.DARK : COMBOCOLORS.LIGHT;
         } else {
@@ -1375,7 +1371,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       if ((segments.length==0) || (options.segmentLength) || (options.rumbleLength))
         resetRoad(); // only rebuild road when necessary
-        gameMellow.play();
     }
 
     //=========================================================================

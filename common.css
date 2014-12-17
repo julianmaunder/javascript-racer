@@ -85,7 +85,7 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 .wolf-animation {
 	z-index: 1;
 	position: absolute;
-	bottom: -50px;
+	bottom: -20px;
 	left: 50%;
 	margin-left: -100px;
 	width: 200px;
@@ -101,13 +101,13 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 .right {
 	background: url('images/wolflarge.png');
 	background-position: 0 640px;
-	animation: wolfright 0.35s steps(12) infinite; 
+	animation: wolfright 0.3s steps(12) infinite; 
 }
 
 .left {
 	background: url('images/wolflarge.png');
 	background-position: -2400px 320px;
-	animation: wolfleft 0.35s steps(12) infinite; 
+	animation: wolfleft 0.3s steps(12) infinite; 
 }
 
 .straightc {
@@ -137,29 +137,29 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 	z-index: 4;
 	width: 640px;
 	height: 480px;
-	background: url('images/feathers.png');
-	background-position: 0 0;
+	background: url('images/feathers.png') no-repeat;
+	background-position: 640px 0;
 
 }
 
 .feather-pop {
-	background: url('images/feathers.png');
-	background-position: 0 0;
-	animation: feathers .6s steps(10); 
+	background: url('images/feathers.png') no-repeat;
+	background-position: 640px 0;
+	animation: feathers .4s steps(6); 
 }
 
 .feather-pop2 {
-	background: url('images/feathers.png');
-	background-position: 0 0;
-	animation: feathers2 .6s steps(10); 
+	background: url('images/feathers.png') no-repeat;
+	background-position: 640px 0;
+	animation: feathers2 .4s steps(6); 
 }
 
 @keyframes feathers {
-   	100% { background-position: -6400px 0; }
+   	100% { background-position: -3200px 0; }
 }
 
 @keyframes feathers2 {
-   	100% { background-position: -6400px 0; }
+   	100% { background-position: -3200px 0; }
 }
 
 .wood-animation {
@@ -196,7 +196,7 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
    	100% { background-position: -4480px 0; }
 }
 
-.hearts {
+.moon {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -205,42 +205,8 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 	z-index: 4;
 	width: 640px;
 	height: 480px;
-	background: url('images/hearts.png');
-	background-position: -3200px 0;
-}
-
-.heart-anim {
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	z-index: 4;
-	width: 640px;
-	height: 480px;
-	background: url('images/getheart.png');
+	background: url('images/moon.png') no-repeat;
 	background-position: 0 0;
-
-}
-
-.heart-pop {
-	background: url('images/getheart.png');
-	background-position: 0 0;
-	animation: heart 0.5s 0.35s steps(7); 
-}
-
-.heart-pop2 {
-	background: url('images/getheart.png');
-	background-position: 0 0;
-	animation: heart2 0.5s 0.35s steps(7); 
-}
-
-@keyframes heart {
-   	100% { background-position: -4480px 0; }
-}
-
-@keyframes heart2 {
-   	100% { background-position: -4480px 0; }
 }
 
 .lightning-animation {

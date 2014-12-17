@@ -4,34 +4,39 @@ myLoader.addFiles(
   "audio/poof.ogg",
   "audio/wood.ogg", 
   "audio/game.mp3", 
-  "audio/getheart.ogg", 
   "images/background.png",
   "images/sprites.png",
   "images/wolflarge.png",
   "images/feathers.png",
-  "images/hearts.png",
   "images/wood.png",
-  'images/combosprites.png'
+  "images/combosprites.png"
   );
 
 myLoader.on('finish', function(){
   $('#start').removeClass("hidden");
-  menuLoop.play();
+  // menuLoop.play();
 });
 
 var title = true;
 
 var poofSound = new Audio("audio/poof.ogg");
+poofSound.volume = 0.2;
 var woodSound = new Audio("audio/wood.ogg");
+woodSound.volume = 0.2;
 var gameSound = new Audio("audio/game.mp3");
 gameSound.loop = true;
-var heartSound = new Audio("audio/getheart.ogg");
+gameSound.volume = 0.2;
 var menuLoop = new Audio("audio/menuloop.ogg");
 menuLoop.loop = true;
-var gameMellow = new Audio("audio/gamemellow.ogg");
+var gameMellow = new Audio("audio/menuloop.ogg");
 gameMellow.loop = true;
+gameMellow.volume = 0.1;
 var gameExciting = new Audio("audio/gameexciting.ogg")
 gameExciting.loop = true;
+gameExciting.volume = 0.1;
+
+var comboSprites = new Image();
+comboSprites.src = ("images/combosprites.png");
 
 
 $('#start').click(function(){
@@ -45,8 +50,8 @@ $('#start').click(function(){
 
 document.onkeypress=function(e){
   if (title) {
-    start();
     title = false;
+    start();
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
     menuLoop.pause();
@@ -157,7 +162,6 @@ if (!window.requestAnimationFrame) { // http://paulirish.com/2011/requestanimati
 // GAME LOOP helpers
 //=========================================================================
 var Game = {  // a modified version of the game loop from my previous boulderdash game - see http://codeincomplete.com/posts/2011/10/25/javascript_boulderdash/#gameloop
-
   run: function(options) {
 
     Game.loadImages(options.images, function(images) {
@@ -184,10 +188,12 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
           gdt = gdt - step;
           update(step);
         }
+        if (title === false) {
         render();
         stats.update();
         last = now;
         requestAnimationFrame(frame, canvas);
+        }
       }
       frame(); // lets get this party started
       $("#wolf").removeClass("hidden");
@@ -472,9 +478,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     var fps            = 60;                      // how many 'update' frames per second
     var step           = 1/fps;                   // how long is each frame (in seconds)
-    var width          = 640;                    // logical canvas width
+    var width          = 640;                     // logical canvas width
     var height         = 480;                     // logical canvas height
-    var centrifugal    = 0.2;                     // centrifugal force multiplier when going around curves
+    var centrifugal    = 0.15;                    // centrifugal force multiplier when going around curves
     var offRoadDecel   = 0.99;                    // speed multiplier when off road (e.g. you lose 2% speed each update frame)
     var skySpeed       = 0.001;                   // background sky layer scroll speed when going around curve (or up hill)
     var hillSpeed      = 0.002;                   // background hill layer scroll speed when going around curve (or up hill)
@@ -506,25 +512,27 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
     var speed          = 0;                       // current speed
     var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
-    var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
+    var accel          =  maxSpeed/20;             // acceleration rate - tuned until it 'felt' right
     var breaking       = -maxSpeed;               // deceleration rate when braking
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
     var totalCars      = 400;                     // total number of cars on the road
-    var totalStumps    = 50;
+    var totalStumps    = 200;
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
     var score          = 0;
     var birds          = 0;
-    var maxHearts      = 6;
-    var hearts         = 6;
+    var maxHearts      = 2;
+    var hearts         = 1;
     var birdHealth     = 99;
     var isCombo        = false;
     var currentCombo   = 1;    
-    var rushBirds      = 5;
+    var rushBirds      = 10;
+    var moonMode       = false;
 
     var img = new Image();   // Create new img element
+    img.src = "images/combosprites.png";
 
     var keyLeft        = false;
     var keyRight       = false;
@@ -557,11 +565,19 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       if (isCombo) {
         score += currentCombo -1;
-        gameMellow.pause();
-        gameExciting.play();
       } else {
-        gameMellow.play();
-        gameExciting.pause();
+      }
+
+      if (currentCombo >= rushBirds - 2) {
+        moonMode = true;
+      }  else { 
+        moonMode = false;
+      }
+      
+      if (speed < maxSpeed/2) {
+        var accel          =  maxSpeed/2; 
+      } else {
+        var accel          =  maxSpeed/20; 
       }
 
       updateCars(dt, playerSegment, playerW);
@@ -605,11 +621,30 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       speed = Util.accelerate(speed, accel, dt);       
 
-      if (isCombo === true) {
-        $("#wolf").css("opacity", "0.2");
-      } else {
-        $("#wolf").css("opacity", "1");
+      function updateMoon() {
+        if (currentCombo === 1) {
+          $(".moon").css("background-position", "0 0");
+        } else if (currentCombo === 2) {
+          $(".moon").css("background-position", "-640px 0");
+        } else if (currentCombo === 3) {
+          $(".moon").css("background-position", "-1280px 0");
+        } else if (currentCombo === 4) {
+          $(".moon").css("background-position", "-1920px 0");
+        } else if (currentCombo === 5) {
+          $(".moon").css("background-position", "-2560px 0");
+        } else if (currentCombo === 6) {
+          $(".moon").css("background-position", "-3200px 0");
+        } else if (currentCombo >= 7) {
+          $(".moon").css("background-position", "-3840px 0");
+        }
+
       }
+
+      // if (isCombo === true) {
+      //   $("#wolf").css("opacity", "0.2");
+      // } else {
+      //   $("#wolf").css("opacity", "1");
+      // }
 
       // if (speed < maxSpeed) {
       //   $('#wolf').css("animation-duration", "0.8s");
@@ -639,50 +674,18 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           if (Util.overlap(playerX, playerW, car.offset, (carW), 1)) {
             // position = Util.increase(car.z, -playerZ, trackLength)
             playerSegment.cars.splice();
+            isCombo = true;
             currentCombo += 1;
             console.log(currentCombo);
-            var currentSpeed = speed;
-            speed    = 0;
-
+            updateMoon();
             if (currentCombo >= rushBirds - 2) {
               carW = (car.sprite.w * SPRITES.SCALE) * 50;
-              isCombo = true;
-              $('#wolf').addClass("hidden");
+              moonMode = true;
             }  else { 
               isCombo = false;
+              moonMode = false;
             }
-
-            setTimeout(function(){ 
-              speed = currentSpeed + maxSpeed/20;
-              if (currentCombo >= rushBirds - 1) {
-                position += 5250;
-                if (keyLeft) {
-                  playerX = playerX - 0.4;
-                }
-                else if (keyRight) {
-                  playerX = playerX + 0.4;
-                }
-              }
-              setTimeout( function(){$('#wolf').removeClass("hidden");}, 200);
-            }, 250);
-
             birds += 1;
-            birdHealth += 1;
-            if (birdHealth === 100) {
-              if (hearts >= 5) {
-                hearts = maxHearts;
-              } else {
-                hearts += 2;
-              }
-              updateHearts();
-              birdHealth = 0;
-              heartSound.play();
-              if ($('.heart-anim').hasClass('heart-pop2')) {
-                $('.heart-anim').addClass('heart-pop').removeClass('heart-pop2');
-              } else {
-                $('.heart-anim').addClass('heart-pop2').removeClass("heart-pop");
-              }
-            }
             poofSound.pause();
             poofSound.currentTime = 0;
             poofSound.play();
@@ -695,6 +698,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           } else {
             isCombo = false;
             currentCombo = 1;
+            updateMoon();
             console.log("miss");
           }
         }
@@ -707,12 +711,15 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           if (Util.overlap(playerX, playerW, stump.offset, stumpW * 0.5, 1)) {
             isCombo = false;
             currentCombo = 1;
+            updateMoon();
             var currentSpeed = speed;
             speed    = maxSpeed/3;
             setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
             // position = Util.increase(car.z, -playerZ, trackLength)
             playerSegment.stumps.splice();
-            hearts--;
+            if (moonMode === false) {
+              hearts = 0;
+            }
             woodSound.pause();
             woodSound.currentTime = 0;
             woodSound.play();
@@ -771,21 +778,15 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     //-------------------------------------------------------------------------
 
     function updateHearts() {
-      if (hearts === 6) {
-        $(".hearts").css("background-position", "-3200px");
-      } else if (hearts === 5) {
-        $(".hearts").css("background-position", "-2560px");
-      } else if (hearts === 4) {
-        $(".hearts").css("background-position", "-1920px");
-      } else if (hearts === 3) {
-        $(".hearts").css("background-position", "-1280px");
-      } else if (hearts === 2) {
-        $(".hearts").css("background-position", "-640px");
-      } else if (hearts === 1) {
-        $(".hearts").css("background-position", "0");
-      } else if (hearts === 0) {
+      if (hearts === 0) {
         gameSound.pause();
-        // $("#racer").remove();
+        // gameMellow.pause();
+        // gameExciting.pause();
+        title = true;
+        $('#start').removeClass("hidden");
+        $('#racer').addClass("hidden");
+        $('.feather-animation').removeClass("feather-pop feather-pop2");
+        $('.woodfeather-animation').removeClass("wood-pop wood-pop2");
       }
     }
 
@@ -1141,7 +1142,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function resetRoad() {
       segments = [];
-      addStraight(100)
+      addStraight(50)
       addBumps();
       addLowRollingHills();
       addHill(ROAD.LENGTH.SHORT, -ROAD.HILL.HARD);
@@ -1158,8 +1159,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       addSCurves();
       addCurve(ROAD.LENGTH.LONG, ROAD.CURVE.MEDIUM, -ROAD.HILL.LOW);
       addBumps();
-      addHill(ROAD.LENGTH.LONG, -ROAD.HILL.MEDIUM);
-      addDownhillToEnd();
+      addHill(ROAD.LENGTH.SHORT, ROAD.HILL.HIGH);
+      addDownhillToEnd(400);
 
       resetSprites();
       resetCars();
@@ -1291,7 +1292,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         totalCars = totalCars * 0.5;
       }
       for (var n = 50 ; n < totalCars ; n++) {
-        lastCar += 16000;
+        lastCar += 10000;
         offset = 0;
         lastCarX = offset;
         z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100

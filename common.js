@@ -23,6 +23,11 @@ var poofSound = new Audio("audio/poof.ogg");
 poofSound.volume = 0.2;
 var woodSound = new Audio("audio/wood.ogg");
 woodSound.volume = 0.2;
+var howlSound = new Audio("audio/howl.ogg");
+var growlSound = new Audio("audio/growlbark.ogg");
+growlSound.volume = 0.5;
+
+
 var gameSound = new Audio("audio/game.mp3");
 gameSound.loop = true;
 gameSound.volume = 0.2;
@@ -31,9 +36,8 @@ menuLoop.loop = true;
 var gameMellow = new Audio("audio/menuloop.ogg");
 gameMellow.loop = true;
 gameMellow.volume = 0.1;
-var gameExciting = new Audio("audio/gameexciting.ogg")
+var gameExciting = new Audio("audio/tatu.mp3")
 gameExciting.loop = true;
-gameExciting.volume = 0.1;
 
 var comboSprites = new Image();
 comboSprites.src = ("images/combosprites.png");
@@ -58,6 +62,7 @@ document.onkeypress=function(e){
 
 
 function start() {
+// gameExciting.play();
 console.log('started');
 //=========================================================================
 // minimalist DOM helpers
@@ -514,17 +519,18 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
     var totalCars      = 400;                     // total number of cars on the road
-    var totalStumps    = 200;
+    var totalStumps    = 100;
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
     var score          = 0;
     var birds          = 0;
+    var birdScore      = 0;
     var maxHearts      = 2;
     var hearts         = 1;
     var birdHealth     = 99;
     var isCombo        = false;
-    var currentCombo   = 1;    
-    var rushBirds      = 10;
+    var currentCombo   = 0;    
+    var rushBirds      = 18;
     var moonMode       = false;
 
     var img = new Image();   // Create new img element
@@ -557,24 +563,27 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       var dx            = dt * 4 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
       var startPosition = position;
 
-      score += 1;
+      playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-      if (isCombo) {
-        score += currentCombo -1;
-      }
+      speed = Util.accelerate(speed, accel, dt);       
 
       if (currentCombo >= rushBirds - 2) {
         moonMode = true;
-      }
+      } 
+
+      if (moonMode && currentCombo === rushBirds - 2) { 
+          howlSound.play();
+        }
       
       if (speed < maxSpeed/2) {
-        accel          =  maxSpeed; 
+        accel          =  maxSpeed*2; 
       } else {
         accel          =  maxSpeed/20; 
       }
 
       updateCars(dt, playerSegment, playerW);
       updateStumps(dt, playerSegment, playerW);
+
       if (hearts > 0) {
         position = Util.increase(position, dt * speed, trackLength);
       }
@@ -610,13 +619,34 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           $('#wolf').addClass('straight').removeClass("right left");
         }
       }
-      playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-      speed = Util.accelerate(speed, accel, dt);       
+      function addPoints() {
+        birdScore = birdScore + 200;
+        if (moonMode) {
+          birdScore = birdScore * 2;
+        }
+        $("#points-animation").text(birdScore);
+
+        if ($('#points-animation').hasClass('points-animation2')) {
+         $('#points-animation').addClass('points-animation1').removeClass('points-animation2');
+        } else {
+           $('#points-animation').addClass('points-animation2').removeClass("points-animation1");
+        }
+      }
+
+      function addMessage(message) {
+        $("#points-animation").text(message);
+
+        if ($('#points-animation').hasClass('points-animation2')) {
+         $('#points-animation').addClass('points-animation1').removeClass('points-animation2');
+        } else {
+           $('#points-animation').addClass('points-animation2').removeClass("points-animation1");
+        }
+      }
 
       function updateMoon() {
         if (moonMode === false) {
-          if (currentCombo === 1) {
+          if (currentCombo <= 1) {
             $(".moon").css("background-position", "0 0");
           } else if (currentCombo === 2) {
             $(".moon").css("background-position", "-640px 0");
@@ -628,11 +658,27 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             $(".moon").css("background-position", "-2560px 0");
           } else if (currentCombo === 6) {
             $(".moon").css("background-position", "-3200px 0");
-          } else if (currentCombo >= 7) {
+          } else if (currentCombo === 7) {
             $(".moon").css("background-position", "-3840px 0");
-          }
+          } else if (currentCombo === 8) {
+            $(".moon").css("background-position", "-4480px 0");
+          } else if (currentCombo === 9) {
+            $(".moon").css("background-position", "-5120px 0");
+          } else if (currentCombo === 10) {
+            $(".moon").css("background-position", "-5760px 0");
+          } else if (currentCombo === 11) {
+            $(".moon").css("background-position", "-6400px 0");
+          } else if (currentCombo === 12) {
+            $(".moon").css("background-position", "-7040px 0");
+          } else if (currentCombo === 13) {
+            $(".moon").css("background-position", "-7680px 0");
+          } else if (currentCombo === 14) {
+            $(".moon").css("background-position", "-8320px 0");
+          } else if (currentCombo === 15) {
+            $(".moon").css("background-position", "-8960px 0");
+          } 
         } else {
-          $(".moon").css("background-position", "-3840px 0");
+          $(".moon").css("background-position", "-9600px 0");
         }
       }
 
@@ -665,7 +711,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       for(n = 0 ; n < playerSegment.cars.length ; n++) {
         car  = playerSegment.cars[n];
-        carW = (car.sprite.w * SPRITES.SCALE) * 2;
+        carW = (car.sprite.w * SPRITES.SCALE) * 3;
         if (speed > car.speed) {
           if (Util.overlap(playerX, playerW, car.offset, (carW), 1)) {
             // position = Util.increase(car.z, -playerZ, trackLength)
@@ -674,6 +720,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             currentCombo += 1;
             console.log(currentCombo);
             updateMoon();
+            addPoints();
             if (currentCombo >= rushBirds - 2) {
               carW = (car.sprite.w * SPRITES.SCALE) * 50;
               moonMode = true;
@@ -681,29 +728,32 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
               isCombo = false;
             }
             birds += 1;
-            poofSound.pause();
-            poofSound.currentTime = 0;
-            poofSound.play();
-              if ($('.feather-animation').hasClass('feather-pop2')) {
-                $('.feather-animation').addClass('feather-pop').removeClass('feather-pop2');
+            // poofSound.pause();
+            // poofSound.currentTime = 0;
+            // poofSound.volume = Math.random(); 
+            // poofSound.play();
+              if ($('#feather').hasClass('feather-pop2')) {
+                $('#feather').addClass('feather-pop').removeClass('feather-pop2');
                } else {
-                  $('.feather-animation').addClass('feather-pop2').removeClass("feather-pop");
+                  $('#feather').addClass('feather-pop2').removeClass("feather-pop");
                }
             break;
           } else {
             isCombo = false;
-            currentCombo = 1;
+            currentCombo = 0;
+            birdScore = 0;
             updateMoon();
-            console.log("miss");
+            addMessage("miss");
           }
         }
       }
 
       for(n = 0 ; n < playerSegment.stumps.length ; n++) {
         stump  = playerSegment.stumps[n];
-        stumpW = stump.sprite.w * SPRITES.SCALE;
+        stumpW = (stump.sprite.w * SPRITES.SCALE) * 0.3;
+        var playerW = playerW * 0.5;
         if (speed > stump.speed) {
-          if (Util.overlap(playerX, playerW, stump.offset, stumpW * 0.5, 1)) {
+          if (Util.overlap(playerX, playerW, stump.offset, stumpW, 1)) {
             playerSegment.stumps.splice();
             isCombo = false;
             currentCombo = 1;
@@ -721,12 +771,13 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             woodSound.pause();
             woodSound.currentTime = 0;
             woodSound.play();
-            if ($('.wood-animation').hasClass('wood-pop2')) {
-              $('.wood-animation').addClass('wood-pop').removeClass('wood-pop2');
+            if ($('#wood').hasClass('wood-pop2')) {
+              $('#wood').addClass('wood-pop').removeClass('wood-pop2');
             } else {
-              $('.wood-animation').addClass('wood-pop2').removeClass("wood-pop");
+              $('#wood').addClass('wood-pop2').removeClass("wood-pop");
             }
             updateHearts();
+            updateMoon();
             break;
           }
         }
@@ -769,24 +820,19 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       //   }
       // }
 
-      updateHud('speed',            score);
-      updateHud('current_lap_time', birds);
+      // updateHud('speed',            score);
+      // updateHud('current_lap_time', birds);
     }
 
     //-------------------------------------------------------------------------
 
     function updateHearts() {
       if (hearts === 0) {
+        title = true;
         $('#wolf').removeClass("straight right left");
-        // $("#wolf").addClass("");
-        setTimeout(function(){
-          speed = speed/40;
-          gameSound.pause();
-          title = true;
-          $('#start').removeClass("hidden");
-          $('#racer').addClass("hidden");
-          $('.feather-animation').removeClass("feather-pop feather-pop2");
-         }, 300);
+        $('#start').removeClass("hidden");
+        $('#racer').addClass("hidden");
+        $('#feather').removeClass("feather-pop feather-pop2");
       }
     }
 
@@ -1294,8 +1340,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       }
       for (var n = 50 ; n < totalCars ; n++) {
         lastCar += 10000;
-        offset = 0;
-        lastCarX = offset;
+        offset = Math.random() * Util.randomChoice([-1, 1]);
         z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
         sprite = Util.randomChoice(SPRITES.CARS);
         speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);

@@ -1,12 +1,11 @@
 
 @font-face {
-    font-family: 'arcade';
-    src: url('arcadeclassic-webfont.eot');
-    src: url('fonts/arcadeclassic-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/arcadeclassic-webfont.woff2') format('woff2'),
-         url('fonts/arcadeclassic-webfont.woff') format('woff'),
-         url('fonts/arcadeclassic-webfont.ttf') format('truetype'),
-         url('fonts/arcadeclassic-webfont.svg#arcadeclassicregular') format('svg');
+    font-family: 'helsinki';
+    src: url('helsinki-webfont.eot');
+    src: url('helsinki-webfont.eot?#iefix') format('embedded-opentype'),
+         url('helsinki-webfont.woff') format('woff'),
+         url('helsinki-webfont.ttf') format('truetype'),
+         url('helsinki-webfont.svg#helsinkiregular') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -32,8 +31,8 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 
 #hud                   { display: none; position: absolute; z-index: 1; width: 640px; padding: 5px 0; font-family: monospace; font-size: 1em; background-color: rgba(255,0,0,0.4); color: black; border-bottom: 2px solid black; box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
 #hud .hud              { background-color: rgba(255,255,255,0.6); padding: 5px; border: 1px solid black; margin: 0 5px; transition-property: background-color; transition-duration: 2s; transition-property: background-color; transition-duration: 2s; }
-#speed            	   { display: block; z-index: 2; position: absolute; width: 300px; top: 0.4em; left: 50%; margin-left: -150px; font-family: 'arcade', sans-serif; font-size: 2.5em; letter-spacing: 0.1em; color: white; text-align: center; }
-#current_lap_time 	   { display: block; z-index: 2; position: absolute; top: 0.4em; left: 550px; font-family: 'arcade', sans-serif; font-size: 2.5em; letter-spacing: 0.1em; color: white; text-align: left; }
+#speed            	   { display: block; z-index: 2; position: absolute; width: 300px; top: 0.4em; left: 50%; margin-left: -150px; font-family: 'helsinki', sans-serif; font-size: 2.5em; letter-spacing: 0.1em; color: white; text-align: center; }
+#current_lap_time 	   { display: block; z-index: 2; position: absolute; top: 0.4em; left: 550px; font-family: 'helsinki', sans-serif; font-size: 2.5em; letter-spacing: 0.1em; color: white; text-align: left; }
 #hud #last_lap_time    { float: left; display: none;  }
 #hud #fast_lap_time    { display: block; width: 12em;  margin: 0 auto; text-align: center; transition-property: background-color; transition-duration: 2s; transition-property: background-color; transition-duration: 2s; }
 #hud .value            { color: black; font-weight: bold; }
@@ -61,8 +60,45 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 	cursor: pointer;
 }
 
+#points {
+	z-index: 9;
+	position: absolute;
+	top: 50%;
+	right: 20px;
+	font-family: 'helsinki', sans-serif;
+	font-size: 2em;
+	text-align: right;
+	color: #000;
+}
+
+@keyframes points1 {
+	0%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 0; }
+	1%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 1; }
+	5%   { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+	90%  { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+   	100% { transform: translateY(20px) translateX(0) scale(1);   opacity: 0; }
+}
+
+@keyframes points2 {
+	0%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 0; }
+	1%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 1; }
+	5%   { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+	90%  { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+   	100% { transform: translateY(20px) translateX(0) scale(1);   opacity: 0; }
+}
+
+.points-animation1 {
+	opacity: 0;
+	animation: points1 2s forwards;
+}
+
+.points-animation2 {
+	opacity: 0;
+	animation: points2 2s forwards;
+}
+
 .titleSlideInAnim {
-	animation: titleSlideIn forwards 0.6s ease-in;
+	animation: titleSlideIn forwards 0.6s linear;
 }
 
 @keyframes wolfright {
@@ -95,7 +131,7 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 .straight {
 	background: url('images/wolflarge.png');
 	background-position: 0 0;
-	animation: wolf 0.35s steps(12) infinite; 
+	animation: wolf 0.3s steps(12) infinite; 
 }
 
 .right {
@@ -107,25 +143,25 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 .left {
 	background: url('images/wolflarge.png');
 	background-position: -2400px 320px;
-	animation: wolfleft 0.35s steps(12) infinite; 
+	animation: wolfleft 0.3s steps(12) infinite; 
 }
 
 .straightc {
 	background: url('images/wolflargewhite.png');
 	background-position: 0 0;
-	animation: wolf 0.35s steps(12) infinite; 
+	animation: wolf 0.3s steps(12) infinite; 
 }
 
 .rightc {
 	background: url('images/wolflargewhite.png');
 	background-position: 0 640px;
-	animation: wolfright 0.35s steps(12) infinite; 
+	animation: wolfright 0.3s steps(12) infinite; 
 }
 
 .leftc {
 	background: url('images/wolflargewhite.png');
 	background-position: -2400px 320px;
-	animation: wolfleft 0.35s steps(12) infinite; 
+	animation: wolfleft 0.3s steps(12) infinite; 
 }
 
 .feather-animation {
@@ -208,6 +244,29 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 	background: url('images/moon.png') no-repeat;
 	background-position: 0 0;
 }
+
+/*.moonshine {
+	position: absolute;
+	top: -740px;
+	left: -200px;
+	width: 1600px;
+	height: 1600px;
+	z-index: 3;
+	opacity: 0.5;
+	background: url('images/moonshine.png') no-repeat;
+	animation: infinite-spinning 10s linear infinite;
+}
+
+@keyframes infinite-spinning {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}*/
+
+
 
 .lightning-animation {
 	position: absolute;

@@ -64,10 +64,11 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 	z-index: 9;
 	position: absolute;
 	top: 50%;
-	right: 20px;
+	left: 70%;
 	font-family: 'helsinki', sans-serif;
 	font-size: 2em;
-	text-align: right;
+	line-height: 0;
+	text-align: left;
 	color: #000;
 }
 
@@ -89,12 +90,50 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 
 .points-animation1 {
 	opacity: 0;
-	animation: points1 2s forwards;
+	animation: points1 1s forwards;
 }
 
 .points-animation2 {
 	opacity: 0;
-	animation: points2 2s forwards;
+	animation: points2 1s forwards;
+}
+
+#message {
+	z-index: 9;
+	position: absolute;
+	top: 50%;
+	right: 70%;
+	font-family: 'helsinki', sans-serif;
+	font-size: 2em;
+	line-height: 0;
+	text-align: right;
+	color: #000;
+}
+
+@keyframes message1 {
+	0%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 0; }
+	1%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 1; }
+	5%   { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+	90%  { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+   	100% { transform: translateY(20px) translateX(0) scale(1);   opacity: 0; }
+}
+
+@keyframes message2 {
+	0%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 0; }
+	1%   { transform: translateY(0px)  translateX(0) scale(1.1); opacity: 1; }
+	5%   { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+	90%  { transform: translateY(0px)  translateX(0) scale(1);   opacity: 1; }
+   	100% { transform: translateY(20px) translateX(0) scale(1);   opacity: 0; }
+}
+
+.message-animation1 {
+	opacity: 0;
+	animation: message1 1s forwards;
+}
+
+.message-animation2 {
+	opacity: 0;
+	animation: message2 1s forwards;
 }
 
 .titleSlideInAnim {
@@ -121,7 +160,7 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 .wolf-animation {
 	z-index: 1;
 	position: absolute;
-	bottom: -20px;
+	bottom: -40px;
 	left: 50%;
 	margin-left: -100px;
 	width: 200px;

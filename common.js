@@ -193,8 +193,8 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
         render();
         stats.update();
         last = now;
-        requestAnimationFrame(frame, canvas);
         }
+        requestAnimationFrame(frame, canvas);
       }
       frame(); // lets get this party started
       $("#wolf").removeClass("hidden");
@@ -499,7 +499,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var sprites        = null;                    // our spritesheet (loaded below)
     var resolution     = null;                    // scaling factor to provide resolution independence (computed)
     var roadWidth      = 2000;                    // actually half the roads width, easier math if the road spans from -roadWidth to +roadWidth
-    var segmentLength  = 150;                     // length of a single segment
+    var segmentLength  = 200;                     // length of a single segment
     var rumbleLength   = 3;                       // number of segments per red/white rumble strip
     var trackLength    = null;                    // z length of entire track (computed)
     var lanes          = 3;                       // number of lanes
@@ -533,9 +533,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var rushBirds      = 18;
     var moonMode       = false;
 
-    var img = new Image();   // Create new img element
-    img.src = "images/combosprites.png";
-
     var keyLeft        = false;
     var keyRight       = false;
     var keyFaster      = false;
@@ -558,131 +555,55 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       var n, car, carW, sprite, spriteW, stump, stumpW;
       var playerSegment = findSegment(position+playerZ);
+      var bplayerSegment = findSegment((position+2000)+playerZ);
       var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
       var speedPercent  = speed/maxSpeed;
-      var dx            = dt * 4 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
+      var dx            = dt * 3 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
       var startPosition = position;
 
       playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-      speed = Util.accelerate(speed, accel, dt);       
+      speed = Util.accelerate(speed, accel, dt);
+
+
+      playerX = Util.limit(playerX, -1, 1);     // dont ever let it go too far out of bounds
+
+      speed   = Util.limit(speed, 0, maxSpeed); // or exceed maxSpeed
+
+      skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
+      hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
+      treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
 
       if (currentCombo >= rushBirds - 2) {
         moonMode = true;
+        $("#points-animation").css("color", "#ffffff");
+        $("#message-animation").css("color", "#ffffff");
       } 
 
       if (moonMode && currentCombo === rushBirds - 2) { 
           howlSound.play();
         }
       
-      if (speed < maxSpeed/2) {
-        accel          =  maxSpeed*2; 
+      if (speed < maxSpeed*0.8) {
+        speed          =  maxSpeed*0.8; 
       } else {
-        accel          =  maxSpeed/20; 
+        accel          =  (maxSpeed/100); 
       }
 
+      if (keyLeft) {
+        playerX = playerX - dx;
+      }
+        
+      else if (keyRight) {
+        playerX = playerX + dx;
+      }
+
+      updateWolf(moonMode, isCombo, keyLeft, keyRight)
       updateCars(dt, playerSegment, playerW);
       updateStumps(dt, playerSegment, playerW);
 
       if (hearts > 0) {
         position = Util.increase(position, dt * speed, trackLength);
-      }
-      if (moonMode) {
-        if (keyLeft) {
-          playerX = playerX - dx;
-          $('#wolf').addClass("leftc").removeClass("straightc rightc");
-        }
-          
-        else if (keyRight) {
-          playerX = playerX + dx;
-          $('#wolf').addClass("rightc").removeClass("straightc leftc");
-        }
-
-        else if (keyLeft === false && keyRight === false) {
-          $('#wolf').addClass('straightc').removeClass("rightc leftc");
-        }
-
-      } else if (isCombo === false) {
-        $('#wolf').removeClass("straightc rightc leftc");
-        
-        if (keyLeft) {
-          playerX = playerX - dx;
-          $('#wolf').addClass("left").removeClass("straight right");
-        }
-          
-        else if (keyRight) {
-          playerX = playerX + dx;
-          $('#wolf').addClass("right").removeClass("straight left");
-        }
-
-        else if (keyLeft === false && keyRight === false) {
-          $('#wolf').addClass('straight').removeClass("right left");
-        }
-      }
-
-      function addPoints() {
-        birdScore = birdScore + 200;
-        if (moonMode) {
-          birdScore = birdScore + 200;
-          $("#points-animation").css("color", "#ffffff");
-        } else {
-          $("#points-animation").css("color", "#000000");
-        }
-        $("#points-animation").text(birdScore);
-
-        if ($('#points-animation').hasClass('points-animation2')) {
-         $('#points-animation').addClass('points-animation1').removeClass('points-animation2');
-        } else {
-           $('#points-animation').addClass('points-animation2').removeClass("points-animation1");
-        }
-      }
-
-      function addMessage(message) {
-        $("#points-animation").text(message);
-
-        if ($('#points-animation').hasClass('points-animation2')) {
-         $('#points-animation').addClass('points-animation1').removeClass('points-animation2');
-        } else {
-           $('#points-animation').addClass('points-animation2').removeClass("points-animation1");
-        }
-      }
-
-      function updateMoon() {
-        if (moonMode === false) {
-          if (currentCombo <= 1) {
-            $(".moon").css("background-position", "0 0");
-          } else if (currentCombo === 2) {
-            $(".moon").css("background-position", "-640px 0");
-          } else if (currentCombo === 3) {
-            $(".moon").css("background-position", "-1280px 0");
-          } else if (currentCombo === 4) {
-            $(".moon").css("background-position", "-1920px 0");
-          } else if (currentCombo === 5) {
-            $(".moon").css("background-position", "-2560px 0");
-          } else if (currentCombo === 6) {
-            $(".moon").css("background-position", "-3200px 0");
-          } else if (currentCombo === 7) {
-            $(".moon").css("background-position", "-3840px 0");
-          } else if (currentCombo === 8) {
-            $(".moon").css("background-position", "-4480px 0");
-          } else if (currentCombo === 9) {
-            $(".moon").css("background-position", "-5120px 0");
-          } else if (currentCombo === 10) {
-            $(".moon").css("background-position", "-5760px 0");
-          } else if (currentCombo === 11) {
-            $(".moon").css("background-position", "-6400px 0");
-          } else if (currentCombo === 12) {
-            $(".moon").css("background-position", "-7040px 0");
-          } else if (currentCombo === 13) {
-            $(".moon").css("background-position", "-7680px 0");
-          } else if (currentCombo === 14) {
-            $(".moon").css("background-position", "-8320px 0");
-          } else if (currentCombo === 15) {
-            $(".moon").css("background-position", "-8960px 0");
-          } 
-        } else {
-          $(".moon").css("background-position", "-9600px 0");
-        }
       }
 
       // if (isCombo === true) {
@@ -712,41 +633,43 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         }
       }
 
-      for(n = 0 ; n < playerSegment.cars.length ; n++) {
-        car  = playerSegment.cars[n];
+      for(n = 0 ; n < bplayerSegment.cars.length ; n++) {
+        car  = bplayerSegment.cars[n];
         carW = (car.sprite.w * SPRITES.SCALE) * 3;
         if (speed > car.speed) {
-          if (Util.overlap(playerX, playerW, car.offset, (carW), 1)) {
+          if (Util.overlap(playerX, playerW, car.offset, carW, 1)) {
             // position = Util.increase(car.z, -playerZ, trackLength)
-            playerSegment.cars.splice();
+            bplayerSegment.cars.splice();
             isCombo = true;
             currentCombo += 1;
             console.log(currentCombo);
-            updateMoon();
-            addPoints();
+            updateMoon(moonMode, currentCombo);
+            addPoints(birdScore, moonMode);
             if (currentCombo >= rushBirds - 2) {
               carW = (car.sprite.w * SPRITES.SCALE) * 50;
               moonMode = true;
             }  else { 
               isCombo = false;
             }
+
             birds += 1;
             // poofSound.pause();
             // poofSound.currentTime = 0;
             // poofSound.volume = Math.random(); 
             // poofSound.play();
-              if ($('#feather').hasClass('feather-pop2')) {
-                $('#feather').addClass('feather-pop').removeClass('feather-pop2');
-               } else {
-                  $('#feather').addClass('feather-pop2').removeClass("feather-pop");
-               }
+            featherAnimation();
             break;
+          } else if (currentCombo >= 1) {
+            isCombo = false;
+            currentCombo = 0;
+            birdScore = 0;
+            updateMoon(moonMode, currentCombo);
+            addMessage("miss");
           } else {
             isCombo = false;
             currentCombo = 0;
             birdScore = 0;
-            updateMoon();
-            addMessage("miss");
+            updateMoon(moonMode, currentCombo);
           }
         }
       }
@@ -760,7 +683,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             playerSegment.stumps.splice();
             isCombo = false;
             currentCombo = 1;
-            updateMoon();
+            updateMoon(moonMode, currentCombo);
             var currentSpeed = speed;
             speed    = maxSpeed/3;
             setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
@@ -780,18 +703,11 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
               $('#wood').addClass('wood-pop2').removeClass("wood-pop");
             }
             updateHearts();
-            updateMoon();
+            updateMoon(moonMode, currentCombo);
             break;
           }
         }
       }
-
-      playerX = Util.limit(playerX, -1, 1);     // dont ever let it go too far out of bounds
-      speed   = Util.limit(speed, 0, maxSpeed); // or exceed maxSpeed
-
-      skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
-      hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
-      treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
 
       // if (position > playerZ) {
       //   if (currentLapTime && (startPosition < playerZ)) {
@@ -828,6 +744,71 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     }
 
     //-------------------------------------------------------------------------
+
+
+
+    function timedPause(time) {
+      var currentSpeed = speed;
+      speed = 0;
+      title = true;
+
+        setTimeout(function(){ 
+          title = false; 
+          speed = currentSpeed;
+          Game.run({
+            canvas: canvas, render: render, update: update, stats: stats, step: step,
+            images: ["background", "sprites"],
+            keys: [
+              { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
+              { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
+              { keys: [KEY.UP,    KEY.W], mode: 'down', action: function() { keyFaster = true;  } },
+              { keys: [KEY.DOWN,  KEY.S], mode: 'down', action: function() { keySlower = true;  } },
+              { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
+              { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
+              { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
+              { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
+            ],
+            ready: function(images) {
+              background = images[0];
+              sprites    = images[1];
+              reset();
+            }
+          });
+        }, time);
+    }
+
+    function updateWolf(moonMode, isCombo, keyLeft, keyRight) {
+      if (moonMode) {
+        if (keyLeft) {
+          $('#wolf').addClass("leftc").removeClass("straightc rightc");
+        }
+          
+        else if (keyRight) {
+          $('#wolf').addClass("rightc").removeClass("straightc leftc");
+        }
+
+        else if (keyLeft === false && keyRight === false) {
+          $('#wolf').addClass('straightc').removeClass("rightc leftc");
+        }
+
+      } else if (isCombo === false) {
+        $('#wolf').removeClass("straightc rightc leftc");
+        
+        if (keyLeft) {
+          $('#wolf').addClass("left").removeClass("straight right");
+        }
+          
+        else if (keyRight) {
+          $('#wolf').addClass("right").removeClass("straight left");
+        }
+
+        else if (keyLeft === false && keyRight === false) {
+          // setTimeout(function(){
+            $('#wolf').addClass('straight').removeClass("right left");
+          // }, 50);
+        }
+      }
+    }
 
     function updateHearts() {
       if (hearts === 0) {
@@ -964,6 +945,82 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         return 0;
     }    
 
+    function addPoints(birdScore, moonMode) {
+        birdScore = birdScore + 200;
+        // var pointSize = 1;
+        // if (isCombo && pointSize < 1.2) {
+        //   pointSize = (currentCombo/10) + 0.5;
+        // }
+        // $("#points-animation").css("font-size", pointSize + "em");
+        if (moonMode) {
+          birdScore = birdScore + 200;
+        }
+        $("#points-animation").text(birdScore);
+
+        if ($('#points-animation').hasClass('points-animation2')) {
+         $('#points-animation').addClass('points-animation1').removeClass('points-animation2');
+        } else {
+           $('#points-animation').addClass('points-animation2').removeClass("points-animation1");
+        }
+      }
+
+      function addMessage(message) {
+        $("#message-animation").text(message);
+
+        if ($('#message-animation').hasClass('message-animation2')) {
+         $('#message-animation').addClass('message-animation1').removeClass('message-animation2');
+        } else {
+           $('#message-animation').addClass('message-animation2').removeClass("message-animation1");
+        }
+      }
+
+      function updateMoon(moonMode, currentCombo) {
+        if (moonMode === false) {
+          $("#points-animation").css("color", "#000000");
+          $("#message-animation").css("color", "#000000");
+          if (currentCombo <= 1) {
+            $(".moon").css("background-position", "0 0");
+          } else if (currentCombo === 2) {
+            $(".moon").css("background-position", "-640px 0");
+          } else if (currentCombo === 3) {
+            $(".moon").css("background-position", "-1280px 0");
+          } else if (currentCombo === 4) {
+            $(".moon").css("background-position", "-1920px 0");
+          } else if (currentCombo === 5) {
+            $(".moon").css("background-position", "-2560px 0");
+          } else if (currentCombo === 6) {
+            $(".moon").css("background-position", "-3200px 0");
+          } else if (currentCombo === 7) {
+            $(".moon").css("background-position", "-3840px 0");
+          } else if (currentCombo === 8) {
+            $(".moon").css("background-position", "-4480px 0");
+          } else if (currentCombo === 9) {
+            $(".moon").css("background-position", "-5120px 0");
+          } else if (currentCombo === 10) {
+            $(".moon").css("background-position", "-5760px 0");
+          } else if (currentCombo === 11) {
+            $(".moon").css("background-position", "-6400px 0");
+          } else if (currentCombo === 12) {
+            $(".moon").css("background-position", "-7040px 0");
+          } else if (currentCombo === 13) {
+            $(".moon").css("background-position", "-7680px 0");
+          } else if (currentCombo === 14) {
+            $(".moon").css("background-position", "-8320px 0");
+          } else if (currentCombo === 15) {
+            $(".moon").css("background-position", "-8960px 0");
+          } 
+        } else {
+          $(".moon").css("background-position", "-9600px 0");
+        }
+      }
+
+      function featherAnimation() {
+        if ($('#feather').hasClass('feather-pop2')) {
+          $('#feather').addClass('feather-pop').removeClass('feather-pop2');
+        } else {
+            $('#feather').addClass('feather-pop2').removeClass("feather-pop");
+        }
+      }
     //-------------------------------------------------------------------------
 
     function updateHud(key, value) { // accessing DOM can be slow, so only do it if value has changed
@@ -1191,7 +1248,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function resetRoad() {
       segments = [];
-      addStraight(50)
       addBumps();
       addLowRollingHills();
       addHill(ROAD.LENGTH.SHORT, -ROAD.HILL.HARD);
@@ -1342,7 +1398,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         totalCars = totalCars;
       }
       for (var n = 50 ; n < totalCars ; n++) {
-        lastCar += 10000;
+        lastCar += 12000;
         offset = Math.random() * Util.randomChoice([-1, 1]);
         z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
         sprite = Util.randomChoice(SPRITES.CARS);

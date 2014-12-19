@@ -499,7 +499,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var sprites        = null;                    // our spritesheet (loaded below)
     var resolution     = null;                    // scaling factor to provide resolution independence (computed)
     var roadWidth      = 2000;                    // actually half the roads width, easier math if the road spans from -roadWidth to +roadWidth
-    var segmentLength  = 200;                     // length of a single segment
+    var segmentLength  = 150;                     // length of a single segment
     var rumbleLength   = 3;                       // number of segments per red/white rumble strip
     var trackLength    = null;                    // z length of entire track (computed)
     var lanes          = 3;                       // number of lanes
@@ -623,7 +623,10 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       function addPoints() {
         birdScore = birdScore + 200;
         if (moonMode) {
-          birdScore = birdScore * 2;
+          birdScore = birdScore + 200;
+          $("#points-animation").css("color", "#ffffff");
+        } else {
+          $("#points-animation").css("color", "#000000");
         }
         $("#points-animation").text(birdScore);
 

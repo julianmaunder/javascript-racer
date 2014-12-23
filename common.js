@@ -9,7 +9,7 @@ myLoader.addFiles(
   "images/wolflarge.png",
   "images/feathers.png",
   "images/wood.png",
-  "images/combosprites.png"
+  "images/combosprites2.png"
   );
 
 myLoader.on('finish', function(){
@@ -40,19 +40,26 @@ var gameExciting = new Audio("audio/tatu.mp3")
 gameExciting.loop = true;
 
 var comboSprites = new Image();
-comboSprites.src = ("images/combosprites.png");
+comboSprites.src = ("images/combosprites2.png");
 
+ var a              = true;
+
+setInterval(function(){
+  if (a === true) {
+    a = false;
+  } else {
+    a = true;
+  }
+}, 300);
 
 $('#start').click(function(){
-    title = false;
-    start();
-    $('#start').addClass("hidden");
-    $('#racer').removeClass("hidden");
+  start();
+  $('#start').addClass("hidden");
+  $('#racer').removeClass("hidden");
 });
 
 document.onkeypress=function(e){
-  if (title) {
-    title = false;
+  if (title === true) {
     start();
     $('#start').addClass("hidden");
     $('#racer').removeClass("hidden");
@@ -62,8 +69,8 @@ document.onkeypress=function(e){
 
 
 function start() {
+title = false;
 // gameExciting.play();
-console.log('started');
 //=========================================================================
 // minimalist DOM helpers
 //=========================================================================
@@ -170,7 +177,7 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
       options.ready(images); // tell caller to initialize itself because images are loaded and we're ready to rumble
 
       Game.setKeyListener(options.keys);
-
+      
       var canvas = options.canvas,    // canvas render target is provided by caller
           update = options.update,    // method to update game logic is provided by caller
           render = options.render,    // method to render the game is provided by caller
@@ -187,12 +194,12 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
         gdt = gdt + dt;
         while (gdt > step) {
           gdt = gdt - step;
-          update(step);
+          update(step, now);
         }
         if (title === false) {
-        render();
-        stats.update();
-        last = now;
+          render();
+          stats.update();
+          last = now;
         }
         requestAnimationFrame(frame, canvas);
       }
@@ -357,7 +364,7 @@ var Render = {
 
   //---------------------------------------------------------------------------
 
-  sprite: function(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY, offsetX, offsetY, clipY) {
+  sprite: function(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY, offsetX, offsetY, clipY, alternate) {
 
                     //  scale for projection AND relative to roadWidth (for tweakUI)
     var destW  = (sprite.w * scale * width/2) * (SPRITES.SCALE * roadWidth);
@@ -367,10 +374,17 @@ var Render = {
     destY = destY + (destH * (offsetY || 0));
 
     var clipH = clipY ? Math.max(0, destY+destH-clipY) : 0;
+
+    var spriteX = sprite.x
+
+    if (a === true) {
+      spriteX = sprite.x + 1600;
+    }
+
     if (clipH < destH)
       if (moonMode) {
         // img.src = 'images/combosprites.png'; // Set source path
-        ctx.drawImage(comboSprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
+        ctx.drawImage(comboSprites, spriteX, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
       } else {
         ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
       }
@@ -390,6 +404,7 @@ var Render = {
       sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_STRAIGHT : SPRITES.PLAYER_STRAIGHT;
 
     Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY + bounce, -0.5, -1);
+
   },
 
   //---------------------------------------------------------------------------
@@ -471,7 +486,7 @@ var SPRITES = {
   PLAYER_RIGHT:           { x:  300, y:    0, w:   60, h:  150 }
 };
 
-SPRITES.SCALE = 0.2 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
+SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
 
 SPRITES.PLANTS     = [SPRITES.TREE1, SPRITES.TREE2, SPRITES.TREE3];
 SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04];
@@ -483,9 +498,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var height         = 480;                     // logical canvas height
     var centrifugal    = 0.15;                    // centrifugal force multiplier when going around curves
     var offRoadDecel   = 0.99;                    // speed multiplier when off road (e.g. you lose 2% speed each update frame)
-    var skySpeed       = 0.001;                   // background sky layer scroll speed when going around curve (or up hill)
-    var hillSpeed      = 0.002;                   // background hill layer scroll speed when going around curve (or up hill)
-    var treeSpeed      = 0.002;                   // background tree layer scroll speed when going around curve (or up hill)
+    var skySpeed       = 0.002;                   // background sky layer scroll speed when going around curve (or up hill)
+    var hillSpeed      = 0.004;                   // background hill layer scroll speed when going around curve (or up hill)
+    var treeSpeed      = 0.004;                   // background tree layer scroll speed when going around curve (or up hill)
     var skyOffset      = 0;                       // current sky scroll offset
     var hillOffset     = 0;                       // current hill scroll offset
     var treeOffset     = 0;                       // current tree scroll offset
@@ -499,7 +514,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var sprites        = null;                    // our spritesheet (loaded below)
     var resolution     = null;                    // scaling factor to provide resolution independence (computed)
     var roadWidth      = 2000;                    // actually half the roads width, easier math if the road spans from -roadWidth to +roadWidth
-    var segmentLength  = 200;                     // length of a single segment
+    var segmentLength  = 150;                     // length of a single segment
     var rumbleLength   = 3;                       // number of segments per red/white rumble strip
     var trackLength    = null;                    // z length of entire track (computed)
     var lanes          = 3;                       // number of lanes
@@ -519,7 +534,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
     var totalCars      = 400;                     // total number of cars on the road
-    var totalStumps    = 100;
+    var totalStumps    = 50;
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
     var score          = 0;
@@ -532,6 +547,14 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var currentCombo   = 0;    
     var rushBirds      = 18;
     var moonMode       = false;
+    var jump           = false; 
+    var jumping        = false; 
+    var sliding        = false;
+    var jumpAmount     = 0;
+
+    var lastKey        = 'left';
+
+    var slideTime = 100;
 
     var keyLeft        = false;
     var keyRight       = false;
@@ -551,15 +574,16 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     // UPDATE THE GAME WORLD
     //=========================================================================
 
-    function update(dt) {
+    function update(dt, now) {
 
       var n, car, carW, sprite, spriteW, stump, stumpW;
       var playerSegment = findSegment(position+playerZ);
-      var bplayerSegment = findSegment((position+2000)+playerZ);
+      var bplayerSegment = findSegment((position+1000)+playerZ);
       var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
       var speedPercent  = speed/maxSpeed;
       var dx            = dt * 3 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
       var startPosition = position;
+      var stopSliding   = null;
 
       playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
@@ -574,6 +598,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
       treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
 
+
+
       if (currentCombo >= rushBirds - 2) {
         moonMode = true;
         $("#points-animation").css("color", "#ffffff");
@@ -584,18 +610,75 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           howlSound.play();
         }
       
-      if (speed < maxSpeed*0.8) {
-        speed          =  maxSpeed*0.8; 
+      if (speed < maxSpeed*0.4) {
+        speed          =  maxSpeed*0.4; 
       } else {
-        accel          =  (maxSpeed/100); 
+        // accel          =  (maxSpeed/100); 
       }
 
+      if (jumping || sliding) {
+        centrifugal = 0.05;
+      } else {
+        centrifugal = 0.15;
+      }
+
+
       if (keyLeft) {
-        playerX = playerX - dx;
+        if (jumping || sliding) {
+          playerX = playerX - (dx/4);
+        } else {
+          playerX = playerX - dx;
+          lastKey = 'left';
+        }
       }
         
       else if (keyRight) {
-        playerX = playerX + dx;
+        if (jumping || sliding) {
+          playerX = playerX + (dx/4);
+        } else {
+          playerX = playerX + dx;
+          lastKey = 'right';
+        }
+      }
+
+      // if (keyFaster && jump === false) {
+      //   sliding = false;
+      //   jump = true;
+      //   wolfJump(jump);
+      //   jumping = true;
+      //   setTimeout(function(){ 
+      //     jumping = false;
+      //     wolfJump(jumping);
+      //   }, 500);
+      //   setTimeout(function(){
+      //     jump = false;
+      //   }, 800);
+      // }
+
+      // var isUphill = checkUphill(playerSegment.p1.world.y, bplayerSegment.p1.world.y);
+
+      if (keySlower && jump === false) {
+        if (playerSegment.curve > 0) {
+          lastKey = 'right';
+        } else if (playerSegment.curve < 0) {
+          lastkey = 'left';
+        }
+
+        checkUphill(playerSegment.p1.world.y, bplayerSegment.p1.world.y);
+        jumping = false;
+        jump = true;
+        sliding = true;
+        wolfSlide(jump, lastKey);
+
+        slideTimer(sliding, lastKey, slideTime)
+
+        setTimeout(function(){
+          jump = false;
+        }, 1000);
+      }if (keySlower === false) {
+        clearTimeout(stopSliding);
+        sliding = false; 
+        wolfSlide(sliding, lastKey);
       }
 
       updateWolf(moonMode, isCombo, keyLeft, keyRight)
@@ -639,12 +722,15 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         if (speed > car.speed) {
           if (Util.overlap(playerX, playerW, car.offset, carW, 1)) {
             // position = Util.increase(car.z, -playerZ, trackLength)
-            bplayerSegment.cars.splice();
+            car.offset = 1000;
             isCombo = true;
             currentCombo += 1;
-            console.log(currentCombo);
-            updateMoon(moonMode, currentCombo);
-            addPoints(birdScore, moonMode);
+            // updateMoon(moonMode, currentCombo);
+            birdScore = birdScore + 200;
+            if (moonMode) {
+              birdScore = birdScore + 200;
+            }
+            // addPoints(birdScore, moonMode);
             if (currentCombo >= rushBirds - 2) {
               carW = (car.sprite.w * SPRITES.SCALE) * 50;
               moonMode = true;
@@ -659,17 +745,17 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             // poofSound.play();
             featherAnimation();
             break;
-          } else if (currentCombo >= 1) {
+          } else if (currentCombo > 1) {
             isCombo = false;
             currentCombo = 0;
             birdScore = 0;
-            updateMoon(moonMode, currentCombo);
-            addMessage("miss");
+            // updateMoon(moonMode, currentCombo);
+            // addMessage("miss");
           } else {
             isCombo = false;
             currentCombo = 0;
             birdScore = 0;
-            updateMoon(moonMode, currentCombo);
+            // updateMoon(moonMode, currentCombo);
           }
         }
       }
@@ -680,31 +766,33 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         var playerW = playerW * 0.5;
         if (speed > stump.speed) {
           if (Util.overlap(playerX, playerW, stump.offset, stumpW, 1)) {
-            playerSegment.stumps.splice();
-            isCombo = false;
-            currentCombo = 1;
-            updateMoon(moonMode, currentCombo);
-            var currentSpeed = speed;
-            speed    = maxSpeed/3;
-            setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
-            // position = Util.increase(car.z, -playerZ, trackLength)
-            playerSegment.stumps.splice();
-            if (moonMode === false) {
-              hearts = 0;
-            } else {
-              moonMode = false;
+            if (jumping === false) {
+              playerSegment.stumps.splice();
+              isCombo = false;
+              currentCombo = 1;
+              // updateMoon(moonMode, currentCombo);
+              var currentSpeed = speed;
+              speed    = maxSpeed/3;
+              setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
+              // position = Util.increase(car.z, -playerZ, trackLength)
+              playerSegment.stumps.splice();
+              if (moonMode === false) {
+                // hearts = 0;
+              } else {
+                moonMode = false;
+              }
+              woodSound.pause();
+              woodSound.currentTime = 0;
+              woodSound.play();
+              if ($('#wood').hasClass('wood-pop2')) {
+                $('#wood').addClass('wood-pop').removeClass('wood-pop2');
+              } else {
+                $('#wood').addClass('wood-pop2').removeClass("wood-pop");
+              }
+              updateHearts(hearts);
+              // updateMoon(moonMode, currentCombo);
+              break;
             }
-            woodSound.pause();
-            woodSound.currentTime = 0;
-            woodSound.play();
-            if ($('#wood').hasClass('wood-pop2')) {
-              $('#wood').addClass('wood-pop').removeClass('wood-pop2');
-            } else {
-              $('#wood').addClass('wood-pop2').removeClass("wood-pop");
-            }
-            updateHearts();
-            updateMoon(moonMode, currentCombo);
-            break;
           }
         }
       }
@@ -745,36 +833,43 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     //-------------------------------------------------------------------------
 
+    function slideTimer(sliding, lastKey, slideTime) {
+      stopSliding = setTimeout(function(){ sliding = false; wolfSlide(sliding, lastKey); }, slideTime);
+    }
+    function checkUphill(ps1, ps2) {
+      var g = ps1 - ps2;
+      if (g < -100) {
+        slideTime = 200;
+        sliding = false;
+      } else if (g < 0) {
+        slideTime = 800;
+      } else {
+        slideTime = 1000;
+      }
+      return slideTime;
+    }
 
+    function wolfJump(jumping) {
+      if (jumping === true) {
+        $(".wolf-animation").addClass("jump");
+      } else {
+        $(".wolf-animation").removeClass("jump");
+      }
+    }
 
-    function timedPause(time) {
-      var currentSpeed = speed;
-      speed = 0;
-      title = true;
-
-        setTimeout(function(){ 
-          title = false; 
-          speed = currentSpeed;
-          Game.run({
-            canvas: canvas, render: render, update: update, stats: stats, step: step,
-            images: ["background", "sprites"],
-            keys: [
-              { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
-              { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
-              { keys: [KEY.UP,    KEY.W], mode: 'down', action: function() { keyFaster = true;  } },
-              { keys: [KEY.DOWN,  KEY.S], mode: 'down', action: function() { keySlower = true;  } },
-              { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
-              { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
-              { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
-              { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
-            ],
-            ready: function(images) {
-              background = images[0];
-              sprites    = images[1];
-              reset();
-            }
-          });
-        }, time);
+    function wolfSlide(jumping, lastKey) {
+      if (jumping === true) {
+        if (lastKey === 'left') {
+          $(".wolf-animation").addClass("slide-left").css("width", "300px");
+          $(".snow-animation").removeClass("hidden");
+        } else if (lastKey === 'right') {
+          $(".wolf-animation").addClass("slide-right").css("width", "300px");
+          $(".snow-animation").removeClass("hidden");
+        }
+      } else {
+        $(".wolf-animation").removeClass("slide-left slide-right").css("width", "200px");
+        $(".snow-animation").addClass("hidden");
+      }
     }
 
     function updateWolf(moonMode, isCombo, keyLeft, keyRight) {
@@ -810,7 +905,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       }
     }
 
-    function updateHearts() {
+    function updateHearts(hearts) {
       if (hearts === 0) {
         title = true;
         $('#wolf').removeClass("straight right left");
@@ -945,16 +1040,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         return 0;
     }    
 
-    function addPoints(birdScore, moonMode) {
-        birdScore = birdScore + 200;
-        // var pointSize = 1;
-        // if (isCombo && pointSize < 1.2) {
-        //   pointSize = (currentCombo/10) + 0.5;
-        // }
-        // $("#points-animation").css("font-size", pointSize + "em");
-        if (moonMode) {
-          birdScore = birdScore + 200;
-        }
+    function addPoints(birdScore) {
         $("#points-animation").text(birdScore);
 
         if ($('#points-animation').hasClass('points-animation2')) {
@@ -962,7 +1048,23 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         } else {
            $('#points-animation').addClass('points-animation2').removeClass("points-animation1");
         }
+        return birdScore;
       }
+
+    //   function textNumbersToImages(text) {
+    //     var output = '';
+    //     // You could define a list of filenames here
+    //     var images = ['0.gif', '1.gif', '2.gif', '3.gif', 
+    //         '4.gif', '5.gif', '6.gif', '7.gif', '8.gif', '9.gif'];
+    //     // We eliminate all characters that are not a number
+    //     var nums = text.replace(/\D/g, ''); 
+    //     // Now we iterate over all those numbers
+    //     for (var i=0; i < nums.length; i++) {
+    //         output += '<img src="' + images[nums.charAt(i)] + '" />';
+    //     }
+    //     // We return the constructed string, that is a list of image tags
+    //     return output;
+    // };
 
       function addMessage(message) {
         $("#message-animation").text(message);
@@ -1115,7 +1217,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, car.percent);
           spriteX     = Util.interpolate(segment.p1.screen.x,     segment.p2.screen.x,     car.percent) + (spriteScale * car.offset * roadWidth * width/2);
           spriteY     = Util.interpolate(segment.p1.screen.y,     segment.p2.screen.y,     car.percent);
-          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, (spriteScale), spriteX, spriteY, -0.5, -1, segment.clip);
+          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, (spriteScale/2), spriteX, spriteY, -0.5, -1, segment.clip);
         }
 
         for(i = 0 ; i < segment.stumps.length ; i++) {
@@ -1124,7 +1226,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, stump.percent);
           spriteX     = Util.interpolate(segment.p1.screen.x,     segment.p2.screen.x,     stump.percent) + (spriteScale * stump.offset * roadWidth * width/2);
           spriteY     = Util.interpolate(segment.p1.screen.y,     segment.p2.screen.y,     stump.percent);
-          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, stump.sprite, (spriteScale/1.5), spriteX, spriteY, -0.5, -1, segment.clip);
+          Render.sprite(ctx, width, height, resolution, roadWidth, sprites, stump.sprite, (spriteScale/3), spriteX, spriteY, -0.5, -1, segment.clip);
         }
        
         for(i = 0 ; i < segment.sprites.length ; i++) {
@@ -1133,7 +1235,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             spriteX     = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width/2);
             spriteY     = segment.p1.screen.y;
 
-            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
+            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale/2, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
         }
 
         if (segment == playerSegment) {
@@ -1189,8 +1291,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     var ROAD = {
       LENGTH: { NONE: 0, SHORT:  25, MEDIUM:   50, LONG:  100 },
-      HILL:   { NONE: 0, LOW:    20, MEDIUM:   40, HIGH:   60 },
-      CURVE:  { NONE: 0, EASY:    2, MEDIUM:    4, HARD:    6 }
+      HILL:   { NONE: 30, LOW:   20, MEDIUM:   25, HIGH:   35 },
+      CURVE:  { NONE: 0, EASY:    2, MEDIUM:    3, HARD:    4 }
     };
 
     function addStraight(num) {
@@ -1435,26 +1537,25 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     //=========================================================================
     // THE GAME LOOP
     //=========================================================================
-
-    Game.run({
-      canvas: canvas, render: render, update: update, stats: stats, step: step,
-      images: ["background", "sprites"],
-      keys: [
-        { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
-        { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
-        { keys: [KEY.UP,    KEY.W], mode: 'down', action: function() { keyFaster = true;  } },
-        { keys: [KEY.DOWN,  KEY.S], mode: 'down', action: function() { keySlower = true;  } },
-        { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
-        { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
-        { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
-        { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
-      ],
-      ready: function(images) {
-        background = images[0];
-        sprites    = images[1];
-        reset();
-      }
-    });
+      Game.run({
+        canvas: canvas, render: render, update: update, stats: stats, step: step,
+        images: ["background", "sprites"],
+        keys: [
+          { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
+          { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
+          { keys: [KEY.UP,    KEY.W], mode: 'down', action: function() { keyFaster = true;  } },
+          { keys: [KEY.DOWN,  KEY.S], mode: 'down', action: function() { keySlower = true;  } },
+          { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
+          { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
+          { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
+          { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
+        ],
+        ready: function(images) {
+          background = images[0];
+          sprites    = images[1];
+          reset();
+        }
+      });
 
     function reset(options) {
       options       = options || {};
@@ -1509,7 +1610,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       Dom.get('currentFogDensity').innerHTML     = Dom.get('fogDensity').value     = fogDensity;
     }
     //=========================================================================
-
   }
+
 
 

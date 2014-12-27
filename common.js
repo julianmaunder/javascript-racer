@@ -377,17 +377,17 @@ var Render = {
 
     var spriteX = sprite.x
 
-    if (a === true) {
-      spriteX = sprite.x + 1600;
-    }
+    // if (a === true) {
+    //   spriteX = sprite.x + 1600;
+    // }
 
-    if (clipH < destH)
-      if (moonMode) {
-        // img.src = 'images/combosprites.png'; // Set source path
-        ctx.drawImage(comboSprites, spriteX, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
-      } else {
+    if (clipH < destH) {
+    //   if (moonMode) {
+    //     // img.src = 'images/combosprites.png'; // Set source path
+    //     ctx.drawImage(comboSprites, spriteX, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
+    //   } else {
         ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
-      }
+    }
   },
 
   //---------------------------------------------------------------------------
@@ -472,6 +472,8 @@ var SPRITES = {
   TREE1:                  { x:    0, y:    0, w:  500, h: 1710 },
   TREE2:                  { x:  560, y:    0, w:  740, h: 1730 },
   TREE3:                  { x: 1300, y:    0, w:  300, h: 1730 },
+  ATREE1:                 { x:    0, y: 1950, w:  360, h:  350 },
+  ATREE2:                 { x:    0, y: 2300, w:  360, h:  350 },
   LOG:                    { x:    0, y: 1760, w:  880, h:  160 },
   STUMP1:                 { x:  880, y: 1760, w:  135, h:  150 },
   CAR03:                  { x:  500, y:  105, w:   55, h:   35 },
@@ -491,16 +493,17 @@ SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite widt
 SPRITES.PLANTS     = [SPRITES.TREE1, SPRITES.TREE2, SPRITES.TREE3];
 SPRITES.CARS       = [SPRITES.CAR01, SPRITES.CAR02, SPRITES.CAR03, SPRITES.CAR04];
 SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
+SPRITES.ATREES     = [SPRITES.ATREE1, SPRITES.ATREE2];
 
     var fps            = 60;                      // how many 'update' frames per second
     var step           = 1/fps;                   // how long is each frame (in seconds)
-    var width          = 640;                     // logical canvas width
-    var height         = 480;                     // logical canvas height
+    var width          = 1024;                     // logical canvas width
+    var height         = 768;                     // logical canvas height
     var centrifugal    = 0.15;                    // centrifugal force multiplier when going around curves
     var offRoadDecel   = 0.99;                    // speed multiplier when off road (e.g. you lose 2% speed each update frame)
-    var skySpeed       = 0.002;                   // background sky layer scroll speed when going around curve (or up hill)
-    var hillSpeed      = 0.004;                   // background hill layer scroll speed when going around curve (or up hill)
-    var treeSpeed      = 0.004;                   // background tree layer scroll speed when going around curve (or up hill)
+    var skySpeed       = 0.001;                   // background sky layer scroll speed when going around curve (or up hill)
+    var hillSpeed      = 0.002;                   // background hill layer scroll speed when going around curve (or up hill)
+    var treeSpeed      = 0.003;                   // background tree layer scroll speed when going around curve (or up hill)
     var skyOffset      = 0;                       // current sky scroll offset
     var hillOffset     = 0;                       // current hill scroll offset
     var treeOffset     = 0;                       // current tree scroll offset
@@ -518,8 +521,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var rumbleLength   = 3;                       // number of segments per red/white rumble strip
     var trackLength    = null;                    // z length of entire track (computed)
     var lanes          = 3;                       // number of lanes
-    var fieldOfView    = 80;                     // angle (degrees) for field of view
-    var cameraHeight   = 500;                    // z height of camera
+    var fieldOfView    = 80;                      // angle (degrees) for field of view
+    var cameraHeight   = 500;                     // z height of camera
     var cameraDepth    = null;                    // z distance camera is from screen (computed)
     var drawDistance   = 900;                     // number of segments to draw
     var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
@@ -533,7 +536,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
     var offRoadDecel   = -maxSpeed;             // off road deceleration is somewhere in between
     var offRoadLimit   =  maxSpeed;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-    var totalCars      = 400;                     // total number of cars on the road
+    var totalCars      = 100;                     // total number of cars on the road
     var totalStumps    = 50;
     var currentLapTime = 0;                       // current lap time
     var lastLapTime    = null;                    // last lap time
@@ -544,9 +547,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var hearts         = 1;
     var birdHealth     = 99;
     var isCombo        = false;
-    var currentCombo   = 0;    
-    var rushBirds      = 18;
-    var moonMode       = false;
+    var currentCombo   = 0;
     var jump           = false; 
     var jumping        = false; 
     var sliding        = false;
@@ -594,21 +595,17 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       speed   = Util.limit(speed, 0, maxSpeed); // or exceed maxSpeed
 
-      skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
-      hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
-      treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
 
 
+      // if (currentCombo >= rushBirds - 2) {
+      //   moonMode = true;
+      //   $("#points-animation").css("color", "#ffffff");
+      //   $("#message-animation").css("color", "#ffffff");
+      // } 
 
-      if (currentCombo >= rushBirds - 2) {
-        moonMode = true;
-        $("#points-animation").css("color", "#ffffff");
-        $("#message-animation").css("color", "#ffffff");
-      } 
-
-      if (moonMode && currentCombo === rushBirds - 2) { 
-          howlSound.play();
-        }
+      // if (moonMode && currentCombo === rushBirds - 2) { 
+      //   howlSound.play();
+      // }
       
       if (speed < maxSpeed*0.4) {
         speed          =  maxSpeed*0.4; 
@@ -624,7 +621,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
 
       if (keyLeft) {
-        if (jumping || sliding) {
+        if (sliding) {
           playerX = playerX - (dx/4);
         } else {
           playerX = playerX - dx;
@@ -633,7 +630,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       }
         
       else if (keyRight) {
-        if (jumping || sliding) {
+        if (sliding) {
           playerX = playerX + (dx/4);
         } else {
           playerX = playerX + dx;
@@ -681,7 +678,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         wolfSlide(sliding, lastKey);
       }
 
-      updateWolf(moonMode, isCombo, keyLeft, keyRight)
+      updateWolf(keyLeft, keyRight)
       updateCars(dt, playerSegment, playerW);
       updateStumps(dt, playerSegment, playerW);
 
@@ -719,38 +716,16 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       for(n = 0 ; n < bplayerSegment.cars.length ; n++) {
         car  = bplayerSegment.cars[n];
         carW = (car.sprite.w * SPRITES.SCALE) * 3;
-        if (speed > car.speed) {
           if (Util.overlap(playerX, playerW, car.offset, carW, 1)) {
-            // position = Util.increase(car.z, -playerZ, trackLength)
             car.offset = 1000;
             isCombo = true;
             currentCombo += 1;
-            // updateMoon(moonMode, currentCombo);
             birdScore = birdScore + 200;
-            if (moonMode) {
-              birdScore = birdScore + 200;
-            }
-            // addPoints(birdScore, moonMode);
-            if (currentCombo >= rushBirds - 2) {
-              carW = (car.sprite.w * SPRITES.SCALE) * 50;
-              moonMode = true;
-            }  else { 
-              isCombo = false;
-            }
-
+            // addPoints(birdScore);
             birds += 1;
-            // poofSound.pause();
-            // poofSound.currentTime = 0;
-            // poofSound.volume = Math.random(); 
-            // poofSound.play();
             featherAnimation();
+            addMessage(currentCombo);
             break;
-          } else if (currentCombo > 1) {
-            isCombo = false;
-            currentCombo = 0;
-            birdScore = 0;
-            // updateMoon(moonMode, currentCombo);
-            // addMessage("miss");
           } else {
             isCombo = false;
             currentCombo = 0;
@@ -758,7 +733,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
             // updateMoon(moonMode, currentCombo);
           }
         }
-      }
 
       for(n = 0 ; n < playerSegment.stumps.length ; n++) {
         stump  = playerSegment.stumps[n];
@@ -768,19 +742,6 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
           if (Util.overlap(playerX, playerW, stump.offset, stumpW, 1)) {
             if (jumping === false) {
               playerSegment.stumps.splice();
-              isCombo = false;
-              currentCombo = 1;
-              // updateMoon(moonMode, currentCombo);
-              var currentSpeed = speed;
-              speed    = maxSpeed/3;
-              setTimeout(function(){ speed = currentSpeed + maxSpeed/2; }, 400);
-              // position = Util.increase(car.z, -playerZ, trackLength)
-              playerSegment.stumps.splice();
-              if (moonMode === false) {
-                // hearts = 0;
-              } else {
-                moonMode = false;
-              }
               woodSound.pause();
               woodSound.currentTime = 0;
               woodSound.play();
@@ -829,6 +790,9 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       // updateHud('speed',            score);
       // updateHud('current_lap_time', birds);
+      skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
+      hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
+      treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
     }
 
     //-------------------------------------------------------------------------
@@ -836,6 +800,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function slideTimer(sliding, lastKey, slideTime) {
       stopSliding = setTimeout(function(){ sliding = false; wolfSlide(sliding, lastKey); }, slideTime);
     }
+
     function checkUphill(ps1, ps2) {
       var g = ps1 - ps2;
       if (g < -100) {
@@ -860,48 +825,31 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function wolfSlide(jumping, lastKey) {
       if (jumping === true) {
         if (lastKey === 'left') {
-          $(".wolf-animation").addClass("slide-left").css("width", "300px");
+          $(".wolf-animation").addClass("slide-left").css({"width": "300px", "margin-left": "-150px"});
           $(".snow-animation").removeClass("hidden");
         } else if (lastKey === 'right') {
-          $(".wolf-animation").addClass("slide-right").css("width", "300px");
+          $(".wolf-animation").addClass("slide-right").css({"width": "300px", "margin-left": "-150px"});
           $(".snow-animation").removeClass("hidden");
         }
       } else {
-        $(".wolf-animation").removeClass("slide-left slide-right").css("width", "200px");
+        $(".wolf-animation").removeClass("slide-left slide-right").css({"width": "200px", "margin-left": "-100px"});
         $(".snow-animation").addClass("hidden");
       }
     }
 
-    function updateWolf(moonMode, isCombo, keyLeft, keyRight) {
-      if (moonMode) {
-        if (keyLeft) {
-          $('#wolf').addClass("leftc").removeClass("straightc rightc");
-        }
-          
-        else if (keyRight) {
-          $('#wolf').addClass("rightc").removeClass("straightc leftc");
-        }
-
-        else if (keyLeft === false && keyRight === false) {
-          $('#wolf').addClass('straightc').removeClass("rightc leftc");
-        }
-
-      } else if (isCombo === false) {
-        $('#wolf').removeClass("straightc rightc leftc");
+    function updateWolf(keyLeft, keyRight) {
+      $('#wolf').removeClass("straightc rightc leftc");
+      
+      if (keyLeft) {
+        $('#wolf').addClass("left").removeClass("straight right");
+      }
         
-        if (keyLeft) {
-          $('#wolf').addClass("left").removeClass("straight right");
-        }
-          
-        else if (keyRight) {
-          $('#wolf').addClass("right").removeClass("straight left");
-        }
+      else if (keyRight) {
+        $('#wolf').addClass("right").removeClass("straight left");
+      }
 
-        else if (keyLeft === false && keyRight === false) {
-          // setTimeout(function(){
-            $('#wolf').addClass('straight').removeClass("right left");
-          // }, 50);
-        }
+      else if (keyLeft === false && keyRight === false) {
+        $('#wolf').addClass('straight').removeClass("right left");
       }
     }
 
@@ -1067,7 +1015,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     // };
 
       function addMessage(message) {
-        $("#message-animation").text(message);
+        $("#message-animation").html(message + "<span>combo</span>");
 
         if ($('#message-animation').hasClass('message-animation2')) {
          $('#message-animation').addClass('message-animation1').removeClass('message-animation2');
@@ -1160,11 +1108,12 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
       ctx.clearRect(0, 0, width, height);
 
-      Render.background(ctx, background, width, height, BACKGROUND.SKY,   skyOffset,  resolution * skySpeed  * playerY);
+      var treeMovement = (resolution * treeSpeed * playerY) / 2;
+
+      Render.background(ctx, background, width, height, BACKGROUND.SKY, skyOffset, resolution * skySpeed * playerY);
       Render.background(ctx, background, width, height, BACKGROUND.HILLS, hillOffset, resolution * hillSpeed * playerY);
-      if (moonMode) {
-        Render.background(ctx, background, width, height, BACKGROUND.TREES, treeOffset, resolution * treeSpeed * playerY);
-      }
+      Render.background(ctx, background, width, height, BACKGROUND.TREES, treeOffset, treeMovement);
+
       var n, i, segment, car, stump, sprite, spriteScale, spriteX, spriteY;
 
       for(n = 0 ; n < drawDistance ; n++) {
@@ -1188,13 +1137,8 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       } 
 
       function renderRoad() {
-        if (moonMode) {
-          fogDensity = 0;
-          segment.color = Math.floor(n/rumbleLength)%2 ? COMBOCOLORS.DARK : COMBOCOLORS.LIGHT;
-        } else {
           fogDensity = 20;
           segment.color = Math.floor(n/rumbleLength)%2 ? COLORS.DARK : COLORS.LIGHT;
-        }
                 Render.segment(ctx, width, lanes,
                        segment.p1.screen.x,
                        segment.p1.screen.y,
@@ -1292,7 +1236,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     var ROAD = {
       LENGTH: { NONE: 0, SHORT:  25, MEDIUM:   50, LONG:  100 },
       HILL:   { NONE: 30, LOW:   20, MEDIUM:   25, HIGH:   35 },
-      CURVE:  { NONE: 0, EASY:    2, MEDIUM:    3, HARD:    4 }
+      CURVE:  { NONE: 0, EASY:    2, MEDIUM:    4, HARD:    6 }
     };
 
     function addStraight(num) {
@@ -1350,7 +1294,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
 
     function resetRoad() {
       segments = [];
-      addBumps();
+      addBumps(100);
       addLowRollingHills();
       addHill(ROAD.LENGTH.SHORT, -ROAD.HILL.HARD);
       addLowRollingHills();
@@ -1385,21 +1329,23 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       addSprite(900, SPRITES.TREE2, -2);
       addSprite(1000, SPRITES.TREE1, -3);
       addSprite(1000, SPRITES.LOG, -1);
+      addSprite(1000, SPRITES.TREE1, -1);
+      addSprite(800, SPRITES.TREE2, 1);
 
       // addSprite(240,                  SPRITES.BILLBOARD07, -1.2);
       // addSprite(240,                  SPRITES.BILLBOARD06,  1.2);
       // addSprite(segments.length - 25, SPRITES.BILLBOARD07, -1.2);
       // addSprite(segments.length - 25, SPRITES.BILLBOARD06,  1.2);
 
-      for(n = 10 ; n < 1000 ; n += 500 + Math.floor(n/100)) {
-        addSprite(n, SPRITES.TREE1, 0.5 + Math.random()*0.5);
-        addSprite(n, SPRITES.TREE2,   1 + Math.random()*2);
-      }
+      // for(n = 10 ; n < 1000 ; n += 500 + Math.floor(n/100)) {
+      //   addSprite(n, SPRITES.TREE1, 0.5 + Math.random()*0.5);
+      //   addSprite(n, SPRITES.TREE2,   1 + Math.random()*2);
+      // }
 
-       for(n = 10 ; n < 1000 ; n += 200 + Math.floor(n/100)) {
-        addSprite(n, SPRITES.TREE1, -2 + Math.random()*0.5);
-        addSprite(n, SPRITES.TREE2,   -4 + Math.random()*2);
-      }
+      //  for(n = 10 ; n < 1000 ; n += 200 + Math.floor(n/100)) {
+      //   addSprite(n, SPRITES.TREE1, -2 + Math.random()*0.5);
+      //   addSprite(n, SPRITES.TREE2,   -4 + Math.random()*2);
+      // }
 
 
       for(n = 250 ; n < 5000 ; n += 500) {
@@ -1432,15 +1378,16 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
     function resetCars() {
       cars = [];
       var n, car, segment, offset, z, sprite, speed;
-      var lastCar = 20000;
-      randomCars(lastCar, n, car, segment, offset, z, sprite, speed);
+      while (course.length){
+        course.shift().call();
+      } // randomCars(lastCar, n, car, segment, offset, z, sprite, speed);
     }
 
     function BirdMiddle(lastCar) {
       offset = 0;
       z      = lastCar;
       sprite = Util.randomChoice(SPRITES.CARS);
-      speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+      speed  = 0;
       car = { offset: offset, z: z, sprite: sprite, speed: speed };
       segment = findSegment(car.z);
       segment.cars.push(car);
@@ -1451,7 +1398,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       offset = -1;
       z      = lastCar;
       sprite = Util.randomChoice(SPRITES.CARS);
-      speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+      speed  = 0;
       car = { offset: offset, z: z, sprite: sprite, speed: speed };
       segment = findSegment(car.z);
       segment.cars.push(car);
@@ -1462,34 +1409,66 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
       offset = 1;
       z      = lastCar;
       sprite = Util.randomChoice(SPRITES.CARS);
-      speed  = maxSpeed/4 + Math.random() * maxSpeed/(sprite == SPRITES.SEMI ? 4 : 2);
+      speed  = 0;
       car = { offset: offset, z: z, sprite: sprite, speed: speed };
       segment = findSegment(car.z);
       segment.cars.push(car);
       cars.push(car);
     }
 
-    function intro(lastCar) {
-      BirdMiddle(lastCar);
-      lastCar += 6000;
+    var fiveLeft = function() {
+      lastCar += birdPadding;
       BirdLeft(lastCar);
-      lastCar += 6000;
-      BirdMiddle(lastCar);
-      lastCar += 6000;
-      BirdRight(lastCar);
-      lastCar += 6000;
-      BirdRight(lastCar);
-      lastCar += 18000;
-      BirdMiddle(lastCar);
-      lastCar += 6000;
+      lastCar += birdSpace;
       BirdLeft(lastCar);
-      lastCar += 6000;
+      lastCar += birdSpace;
+      BirdLeft(lastCar);
+      lastCar += birdSpace;
+      BirdLeft(lastCar);
+      lastCar += birdSpace;
+      BirdLeft(lastCar);
+    }
+
+    var fiveMiddle = function() {
+      lastCar += birdPadding;
       BirdMiddle(lastCar);
-      lastCar += 6000;
+      lastCar += birdSpace;
+      BirdMiddle(lastCar);
+      lastCar += birdSpace;
+      BirdMiddle(lastCar);
+      lastCar += birdSpace;
+      BirdMiddle(lastCar);
+      lastCar += birdSpace;
+      BirdMiddle(lastCar);
+    }
+
+    var fiveRight = function() {
+      lastCar += birdPadding;
       BirdRight(lastCar);
-      lastCar += 6000;
+      lastCar += birdSpace;
+      BirdRight(lastCar);
+      lastCar += birdSpace;
+      BirdRight(lastCar);
+      lastCar += birdSpace;
+      BirdRight(lastCar);
+      lastCar += birdSpace;
       BirdRight(lastCar);
     }
+
+    var spacer = function() {
+      lastCar += birdPadding*5;
+    }
+
+    var lastCar = 0;
+    var birdSpace = 1500;
+    var birdPadding= 10000;
+
+    var course = [ spacer,
+                   fiveMiddle, fiveLeft, fiveMiddle, fiveRight, spacer,
+                   fiveMiddle, fiveLeft, fiveMiddle, fiveRight, spacer,
+                   fiveMiddle, fiveLeft, fiveMiddle, fiveRight, spacer,
+                   fiveMiddle, fiveLeft, fiveMiddle, fiveRight, spacer,
+                   fiveMiddle, fiveLeft, fiveMiddle, fiveRight, spacer ]
 
 
     function randomCars(lastCar, n, car, segment, offset, z, sprite, speed) {
@@ -1500,7 +1479,7 @@ SPRITES.STUMPS     = [SPRITES.STUMP1, SPRITES.STUMP1];
         totalCars = totalCars;
       }
       for (var n = 50 ; n < totalCars ; n++) {
-        lastCar += 12000;
+        lastCar += 2000;
         offset = Math.random() * Util.randomChoice([-1, 1]);
         z      = lastCar + (Math.floor(Math.random() * 10) + 1) * 100
         sprite = Util.randomChoice(SPRITES.CARS);

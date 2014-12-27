@@ -21,7 +21,19 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 #controls th  { text-align: right; vertical-align: middle; }
 #instructions { clear: left; float: left; width: 17em; padding: 1em; border: 1px solid black; box-shadow: 0 0 5px black; }
 #racer        { overflow: hidden; position: relative; top: 0; left: 50%; z-index: 0; width: 640px; height: 480px; margin-left: -320px; background: url('images/logo.png'); }
-#canvas       { position: absolute; z-index: 0; width: 640px; height: 480px; z-index: 0; background-color: #efefef; }
+#canvas       { 
+	position: absolute;
+	z-index: 0;
+	width: 640px; 
+	height: 480px; 
+	z-index: 0; 
+	background-color: #efefef; 
+	image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    -ms-interpolation-mode: nearest-neighbor;
+	}
 #mute         { display:none; background-position:   0px 0px; width: 32px; height: 32px; background: url(images/mute.png); display: inline-block; cursor: pointer; position: absolute; margin-left: 20em; }
 #mute.on      { background-position: -32px 0px; }
 
@@ -101,13 +113,17 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 #message {
 	z-index: 9;
 	position: absolute;
-	top: 50%;
-	right: 70%;
+	top: 55%;
+	left: 5%;
 	font-family: 'helsinki', sans-serif;
-	font-size: 2em;
+	font-size: 3em;
 	line-height: 0;
 	text-align: right;
-	color: #000;
+	color: skyblue;
+}
+
+#message span {
+	font-size: 0.5em;
 }
 
 @keyframes message1 {
@@ -153,8 +169,7 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 }
 
 #wolf {
-	/*transform: translateY(0);*/
-	/*transition: transform 2s ease-in;*/
+
 }
 
 .wolf-animation {
@@ -247,7 +262,7 @@ body          { font-family: Arial, Helvetica, sans-serif; background: #efefef; 
 	height: 480px;
 	background: url('images/snow.png') no-repeat;
 	background-position: 0 0;
-	animation: snowanim .4s steps(4) infinite; 
+	animation: snowanim .3s steps(4) infinite; 
 }
 
 .feather-animation {
